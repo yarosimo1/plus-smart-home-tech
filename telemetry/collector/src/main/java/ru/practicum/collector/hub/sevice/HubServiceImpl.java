@@ -3,18 +3,18 @@ package ru.practicum.collector.hub.sevice;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.collector.EventCollectorProducer;
-import ru.practicum.collector.sensor.event.SensorEvent;
+import ru.practicum.collector.EventRouter;
+import ru.practicum.collector.hub.event.HubEvent;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class HubServiceImpl implements HubService {
-    private final EventCollectorProducer producer;
+    private final EventRouter eventRouter;
 
     @Override
-    public void send(SensorEvent event) {
+    public void send(HubEvent event) {
         log.info("Отпарвка сообщения хаба");
-        producer.send(event.getHubId(), event);
+        eventRouter.routeHubEvent(event);
     }
 }
