@@ -17,7 +17,7 @@ public class EventRouter {
     private final KafkaTemplate<String, SpecificRecordBase> kafkaTemplate;
 
     public void routeSensorEvent(SensorEvent event) {
-        log.info("Обработка сообщения роутером для сенсоров");
+        log.info("Отправка сообщения: {}", event);
         SpecificRecordBase avro = SensorMapper.toAvro(event);
 
         kafkaTemplate.send(
@@ -28,7 +28,7 @@ public class EventRouter {
     }
 
     public void routeHubEvent(HubEvent event) {
-        log.info("Обработка сообщения роутером для хабов");
+        log.info("Отправка сообщения: {}", event);
         SpecificRecordBase avro = HubMapper.toAvro(event);
 
         kafkaTemplate.send(

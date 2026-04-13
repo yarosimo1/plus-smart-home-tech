@@ -5,30 +5,49 @@ import org.apache.avro.specific.SpecificRecordBase;
 import ru.practicum.collector.hub.event.HubEvent;
 import ru.practicum.collector.hub.event.device.DeviceAddedEvent;
 import ru.practicum.collector.hub.event.device.DeviceRemovedEvent;
+import ru.practicum.collector.hub.event.scenario.DeviceAction;
 import ru.practicum.collector.hub.event.scenario.ScenarioAddedEvent;
+import ru.practicum.collector.hub.event.scenario.ScenarioCondition;
 import ru.practicum.collector.hub.event.scenario.ScenarioRemovedEvent;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceRemovedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
+import ru.yandex.practicum.kafka.telemetry.event.*;
 
 @UtilityClass
 public class HubMapper {
     public SpecificRecordBase toAvro(HubEvent event) {
         if (event instanceof DeviceAddedEvent deviceAddedEvent) {
-            return toDeviceAddedEventAvro(deviceAddedEvent);
+            HubEventAvro avro = new HubEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toDeviceAddedEventAvro(deviceAddedEvent));
+
+            return avro;
         }
 
         if (event instanceof DeviceRemovedEvent deviceRemovedEvent) {
-            return toDeviceRemovedEventAvro(deviceRemovedEvent);
+            HubEventAvro avro = new HubEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toDeviceRemovedEventAvro(deviceRemovedEvent));
+
+            return avro;
         }
 
         if (event instanceof ScenarioAddedEvent scenarioAddedEvent) {
-            return toScenarioAddedEventAvro(scenarioAddedEvent);
+            HubEventAvro avro = new HubEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toScenarioAddedEventAvro(scenarioAddedEvent));
+
+            return avro;
         }
 
         if (event instanceof ScenarioRemovedEvent scenarioRemovedEvent) {
-            return toScenarioRemovedEventAvro(scenarioRemovedEvent);
+            HubEventAvro avro = new HubEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toScenarioRemovedEventAvro(scenarioRemovedEvent));
+
+            return avro;
         }
 
         throw new RuntimeException("Unknow event");
@@ -37,7 +56,7 @@ public class HubMapper {
     private DeviceAddedEventAvro toDeviceAddedEventAvro(DeviceAddedEvent event) {
         DeviceAddedEventAvro avro = new DeviceAddedEventAvro();
         avro.setId(event.getId());
-        avro.setType(event.getDeviceType());
+        avro.setDeviceType(DeviceTypeAvro.valueOf(event.getDeviceType().name()));
 
         return avro;
     }
@@ -51,9 +70,42 @@ public class HubMapper {
 
     private ScenarioAddedEventAvro toScenarioAddedEventAvro(ScenarioAddedEvent event) {
         ScenarioAddedEventAvro avro = new ScenarioAddedEventAvro();
-        avro.setActions(event.getActions());
-        avro.setConditions(event.getScenarioConditions());
         avro.setName(event.getName());
+
+        avro.setActions(
+                event.getActions()
+                        .stream()
+                        .map(HubMapper::toDeviceActionAvro)
+                        .toList()
+        );
+
+        avro.setConditions(
+                event.getScenarioConditions()
+                        .stream()
+                        .map(HubMapper::toScenarioConditionAvro)
+                        .toList()
+        );
+        return avro;
+    }
+
+    private ScenarioConditionAvro toScenarioConditionAvro(ScenarioCondition cond) {
+
+        ScenarioConditionAvro avro = new ScenarioConditionAvro();
+
+        avro.setSensorId(cond.getSensorId());
+        avro.setType(cond.getType());
+        avro.setOperation(cond.getOperation());
+        avro.setValue(cond.getValue());
+
+        return avro;
+    }
+
+    private DeviceActionAvro toDeviceActionAvro(DeviceAction action) {
+        DeviceActionAvro avro = new DeviceActionAvro();
+
+        avro.setSensorId(action.getSensorId());
+        avro.setType(action.getType());
+        avro.setValue(action.getValue());
 
         return avro;
     }

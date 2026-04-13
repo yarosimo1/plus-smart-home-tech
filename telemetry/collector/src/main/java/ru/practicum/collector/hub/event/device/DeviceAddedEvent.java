@@ -5,17 +5,16 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.practicum.collector.hub.event.HubEvent;
 import ru.practicum.collector.hub.event.HubEventType;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceTypeAvro;
 
 @Getter
 @Setter
 @ToString(callSuper = true)
 public class DeviceAddedEvent extends HubEvent {
     private String id;
-    private DeviceTypeAvro deviceType;
+    private DeviceType deviceType;
 
     @Override
     public HubEventType getType() {
-        return HubEventType.DEVICE_ADDED_EVENT;
+        return HubEventType.DEVICE_ADDED;
     }
 }

@@ -10,23 +10,48 @@ public class SensorMapper {
 
     public SpecificRecordBase toAvro(SensorEvent event) {
         if (event instanceof LightSensorEvent light) {
-            return toLightSensorAvro(light);
+            SensorEventAvro avro = new SensorEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setId(event.getId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toLightSensorAvro(light));
+            return avro;
         }
 
         if (event instanceof ClimateSensorEvent climate) {
-            return toClimateSensorAvro(climate);
+            SensorEventAvro avro = new SensorEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setId(event.getId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toClimateSensorAvro(climate));
+            return avro;
         }
 
         if (event instanceof MotionSensorEvent motion) {
-            return toMotionSensorAvro(motion);
+            SensorEventAvro avro = new SensorEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setId(event.getId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toMotionSensorAvro(motion));
+            return avro;
         }
 
         if (event instanceof SwitchSensorEvent switchSensor) {
-            return toSwitchSensorAvro(switchSensor);
+            SensorEventAvro avro = new SensorEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setId(event.getId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toSwitchSensorAvro(switchSensor));
+            return avro;
         }
 
         if (event instanceof TemperatureSensorEvent temperatureSensor) {
-            return toTemperatureSensorAvro(temperatureSensor);
+            SensorEventAvro avro = new SensorEventAvro();
+            avro.setHubId(event.getHubId());
+            avro.setId(event.getId());
+            avro.setTimestamp(event.getTimestamp());
+            avro.setPayload(toTemperatureSensorAvro(temperatureSensor));
+            return avro;
         }
 
         throw new RuntimeException("Unknow event");

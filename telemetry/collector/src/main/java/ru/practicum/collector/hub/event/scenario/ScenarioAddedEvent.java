@@ -5,8 +5,6 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.practicum.collector.hub.event.HubEvent;
 import ru.practicum.collector.hub.event.HubEventType;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
 import java.util.List;
 
 @Getter
@@ -14,11 +12,11 @@ import java.util.List;
 @ToString(callSuper = true)
 public class ScenarioAddedEvent extends HubEvent {
     private String name;
-    private List<ScenarioConditionAvro> scenarioConditions;
-    private List<DeviceActionAvro> actions;
+    private List<ScenarioCondition> scenarioConditions;
+    private List<DeviceAction> actions;
 
     @Override
     public HubEventType getType() {
-        return HubEventType.SCENARIO_ADDED_EVENT;
+        return HubEventType.SCENARIO_ADDED;
     }
 }
