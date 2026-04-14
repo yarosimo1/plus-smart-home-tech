@@ -1,13 +1,16 @@
 package ru.practicum.collector.hub.event.scenario;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class DeviceAction {
     private String sensorId;
-    private ActionTypeAvro type;
+    @JsonProperty("type")
+    private ActionType actionType;
     private Integer value;
 }

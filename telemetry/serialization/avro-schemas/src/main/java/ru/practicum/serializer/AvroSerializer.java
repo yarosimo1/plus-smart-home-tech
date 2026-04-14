@@ -1,4 +1,4 @@
-package ru.practicum.collector;
+package ru.practicum.serializer;
 
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
@@ -11,7 +11,7 @@ import org.apache.kafka.common.serialization.Serializer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class CollectorAvroSerializer implements Serializer<SpecificRecordBase> {
+public class AvroSerializer implements Serializer<SpecificRecordBase> {
     private final EncoderFactory encoderFactory = EncoderFactory.get();
     private BinaryEncoder encoder;
 

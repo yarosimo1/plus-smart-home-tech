@@ -4,7 +4,7 @@ spring:
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: ru.practicum.collector.CollectorAvroSerializer
+      value-serializer: ru.practicum.serializer.AvroSerializer
 
       acks: all
       retries: 10

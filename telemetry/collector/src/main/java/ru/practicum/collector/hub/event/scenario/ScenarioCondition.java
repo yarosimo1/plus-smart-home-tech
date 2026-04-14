@@ -1,15 +1,18 @@
 package ru.practicum.collector.hub.event.scenario;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import ru.yandex.practicum.kafka.telemetry.event.ConditionOperationAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class ScenarioCondition {
     private String sensorId;
-    private ConditionTypeAvro type;
-    private ConditionOperationAvro operation;
+    @JsonProperty("type")
+    private ConditionType conditionType;
+    @JsonProperty("operation")
+    private ConditionOperation conditionOperation;
     private Integer value;
 }

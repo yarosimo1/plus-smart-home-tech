@@ -2,6 +2,7 @@ package ru.practicum.collector.hub.event;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,7 +10,6 @@ import ru.practicum.collector.hub.event.device.DeviceAddedEvent;
 import ru.practicum.collector.hub.event.device.DeviceRemovedEvent;
 import ru.practicum.collector.hub.event.scenario.ScenarioAddedEvent;
 import ru.practicum.collector.hub.event.scenario.ScenarioRemovedEvent;
-import ru.practicum.collector.sensor.event.*;
 
 import java.time.Instant;
 
@@ -17,7 +17,7 @@ import java.time.Instant;
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
-        defaultImpl = SensorEventType.class
+        defaultImpl = HubEventType.class
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DeviceAddedEvent.class, name = "DEVICE_ADDED"),
@@ -29,6 +29,7 @@ import java.time.Instant;
 @Setter
 @ToString
 public abstract class HubEvent {
+    @NotBlank
     private String hubId;
     private Instant timestamp = Instant.now();
 
