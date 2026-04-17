@@ -1,4 +1,4 @@
-package ru.practicum.collector.handler;
+package ru.practicum.collector.handler.kafka;
 
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -12,7 +12,6 @@ public class KafkaEventProducer {
     public KafkaEventProducer(KafkaProducer<String, SpecificRecordBase> producer) {
         this.producer = producer;
     }
-
 
     public void send(String topic, String key, SpecificRecordBase value) {
         ProducerRecord<String, SpecificRecordBase> record =

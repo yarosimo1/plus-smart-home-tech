@@ -1,21 +1,24 @@
 package ru.practicum.collector.handler.sensor;
 
 import org.apache.avro.specific.SpecificRecordBase;
-import ru.practicum.collector.handler.KafkaEventProducer;
+import ru.practicum.collector.handler.kafka.KafkaEventProducer;
+import ru.practicum.collector.handler.kafka.config.KafkaConfigProperties;
 import ru.practicum.collector.model.sensor.event.SensorEvent;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
 public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
     private final KafkaEventProducer kafkaEventProducer;
-    private final String TELEMETRY_SENSOR_V1 = "telemetry.sensors.v1";
+    private final KafkaConfigProperties topics;
 
-    public BaseSensorEventHandler(KafkaEventProducer kafkaEventProducer) {
+
+    public BaseSensorEventHandler(KafkaEventProducer kafkaEventProducer, KafkaConfigProperties topics) {
         this.kafkaEventProducer = kafkaEventProducer;
+        this.topics = topics;
     }
 
     @Override
     public void handle(SensorEvent event) {
-        SpecificRecordBase payload = mapToAvro(event);
+        T payload = mapToAvro(event);
 
         SensorEventAvro avro = SensorEventAvro.newBuilder()
                 .setId(event.getId())
@@ -25,7 +28,7 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
                 .build();
 
         kafkaEventProducer.send(
-                TELEMETRY_SENSOR_V1,
+                topics.getTopics().getSensors(),
                 event.getHubId(),
                 avro
         );

@@ -1,21 +1,23 @@
 package ru.practicum.collector.handler.hub;
 
 import org.apache.avro.specific.SpecificRecordBase;
-import ru.practicum.collector.handler.KafkaEventProducer;
+import ru.practicum.collector.handler.kafka.KafkaEventProducer;
+import ru.practicum.collector.handler.kafka.config.KafkaConfigProperties;
 import ru.practicum.collector.model.hub.event.HubEvent;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 
 public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
     private final KafkaEventProducer kafkaEventProducer;
-    private final String TELEMETRY_HUBS_V1 = "telemetry.hubs.v1";
+    private final KafkaConfigProperties topics;
 
-    public BaseHubEventHandler(KafkaEventProducer kafkaEventProducer) {
+    public BaseHubEventHandler(KafkaEventProducer kafkaEventProducer, KafkaConfigProperties topics) {
         this.kafkaEventProducer = kafkaEventProducer;
+        this.topics = topics;
     }
 
     @Override
     public void handle(HubEvent event) {
-        SpecificRecordBase payload = mapToAvro(event);
+        T payload = mapToAvro(event);
 
         HubEventAvro avro = HubEventAvro.newBuilder()
                 .setHubId(event.getHubId())
@@ -24,7 +26,7 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
                 .build();
 
         kafkaEventProducer.send(
-                TELEMETRY_HUBS_V1,
+                topics.getTopics().getHubs(),
                 event.getHubId(),
                 avro
         );
