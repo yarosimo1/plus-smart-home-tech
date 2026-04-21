@@ -3,8 +3,10 @@ package ru.practicum.collector.handler.sensor;
 import org.apache.avro.specific.SpecificRecordBase;
 import ru.practicum.collector.handler.kafka.KafkaEventProducer;
 import ru.practicum.collector.handler.kafka.config.KafkaConfigProperties;
-import ru.practicum.collector.model.sensor.event.SensorEvent;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
+
+import java.time.Instant;
 
 public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
     private final KafkaEventProducer kafkaEventProducer;
@@ -17,13 +19,14 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
     }
 
     @Override
-    public void handle(SensorEvent event) {
+    public void handle(SensorEventProto event) {
         T payload = mapToAvro(event);
 
         SensorEventAvro avro = SensorEventAvro.newBuilder()
                 .setId(event.getId())
                 .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(event.getTimestamp().getSeconds(),
+                        event.getTimestamp().getNanos()))
                 .setPayload(payload)
                 .build();
 
@@ -34,5 +37,5 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
         );
     }
 
-    public abstract T mapToAvro(SensorEvent event);
+    public abstract T mapToAvro(SensorEventProto event);
 }

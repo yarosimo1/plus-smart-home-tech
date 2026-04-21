@@ -3,9 +3,8 @@ package ru.practicum.collector.handler.hub;
 import org.springframework.stereotype.Component;
 import ru.practicum.collector.handler.kafka.KafkaEventProducer;
 import ru.practicum.collector.handler.kafka.config.KafkaConfigProperties;
-import ru.practicum.collector.model.hub.event.HubEvent;
-import ru.practicum.collector.model.hub.event.HubEventType;
-import ru.practicum.collector.model.hub.event.scenario.ScenarioRemovedEvent;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.ScenarioRemovedEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 
 @Component(value = "SCENARIO_REMOVED")
@@ -15,15 +14,15 @@ public class ScenarioRemovedHandlers extends BaseHubEventHandler<ScenarioRemoved
     }
 
     @Override
-    public ScenarioRemovedEventAvro mapToAvro(HubEvent event) {
-        ScenarioRemovedEvent _event = (ScenarioRemovedEvent) event;
+    public ScenarioRemovedEventAvro mapToAvro(HubEventProto event) {
+        ScenarioRemovedEventProto _event = event.getScenarioRemoved();
         return ScenarioRemovedEventAvro.newBuilder()
                 .setName(_event.getName())
                 .build();
     }
 
     @Override
-    public HubEventType getMessageType() {
-        return HubEventType.SCENARIO_REMOVED;
+    public HubEventProto.PayloadCase getMessageType() {
+        return HubEventProto.PayloadCase.SCENARIO_REMOVED;
     }
 }
