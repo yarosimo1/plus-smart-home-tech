@@ -1,0 +1,11 @@
+app:
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer:  ru.yandex.practicum.SensorEventDeserializer
+
+    topics:
+      sensors: telemetry.sensors.v1
+      snapshot: telemetry.snapshots.v1
