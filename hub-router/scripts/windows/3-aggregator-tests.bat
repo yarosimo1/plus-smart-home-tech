@@ -20,8 +20,8 @@ echo.
 java -jar "%JAR_PATH%" ^
   --hub-router.execution.mode=AGGREGATION ^
   --hub-router.execution.immediate-logging.enabled=false ^
-  --hub-router.execution.output.info-enabled=true ^
-  --hub-router.execution.output.trace-enabled=true ^
+  --hub-router.execution.output.info-enabled=false ^
+  --hub-router.execution.output.trace-enabled=false ^
   --hub-router.execution.output.console=true ^
   --hub-router.skip-summary-on-startup=false
 
