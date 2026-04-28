@@ -1,4 +1,4 @@
-package ru.yandex.practicum.kafka.deserializer;
+package ru.practicum.telemetry.deserializer;
 
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 

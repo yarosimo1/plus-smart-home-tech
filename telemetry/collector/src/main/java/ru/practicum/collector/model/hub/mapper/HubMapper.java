@@ -21,7 +21,7 @@ public class HubMapper {
                 .toList();
     }
 
-    private ScenarioConditionAvro toScenarioConditionAvro(ScenarioConditionProto cond) {
+    private static ScenarioConditionAvro toScenarioConditionAvro(ScenarioConditionProto cond) {
 
         ScenarioConditionAvro avro = new ScenarioConditionAvro();
 
@@ -40,7 +40,7 @@ public class HubMapper {
         return avro;
     }
 
-    private DeviceActionAvro toDeviceActionAvro(DeviceActionProto action) {
+    private static DeviceActionAvro toDeviceActionAvro(DeviceActionProto action) {
         DeviceActionAvro avro = new DeviceActionAvro();
 
         avro.setSensorId(action.getSensorId());

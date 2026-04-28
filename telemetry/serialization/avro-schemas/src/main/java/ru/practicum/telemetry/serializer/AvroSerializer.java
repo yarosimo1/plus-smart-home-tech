@@ -1,4 +1,4 @@
-package ru.practicum.serializer;
+package ru.practicum.telemetry.serializer;
 
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
