@@ -16,5 +16,5 @@ public class Condition {
 
     private String type;
     private String operation;
-    private Integer value;
+    private Object value;
 }

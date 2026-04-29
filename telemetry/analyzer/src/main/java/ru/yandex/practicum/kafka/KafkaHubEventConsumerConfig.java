@@ -15,7 +15,7 @@ public class KafkaHubEventConsumerConfig {
     private final KafkaConfigProperties kafkaConfigProperties;
 
     @Bean
-    public KafkaConsumer<String, SpecificRecordBase> kafkaConsumer() {
+    public KafkaConsumer<String, SpecificRecordBase> kafkaHubEventConsumer() {
 
         Properties props = new Properties();
 
