@@ -1,11 +1,11 @@
 package ru.yandex.practicum.processors;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.KafkaConfigProperties;
 import ru.yandex.practicum.kafka.telemetry.event.*;
@@ -16,14 +16,23 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class HubEventProcessor implements Runnable {
     private final KafkaConsumer<String, SpecificRecordBase> consumer;
     private final KafkaConfigProperties topics;
     private final ScenarioService scenarioService;
 
-    @Override
+    public HubEventProcessor(
+            @Qualifier("kafkaHubEventConsumer")
+            KafkaConsumer<String, SpecificRecordBase> consumer,
+            KafkaConfigProperties topics,
+            ScenarioService scenarioService
+    ) {
+        this.consumer = consumer;
+        this.topics = topics;
+        this.scenarioService = scenarioService;
+    }
 
+    @Override
     public void run() {
         log.info("HubEventProcessor started");
 
@@ -36,6 +45,8 @@ public class HubEventProcessor implements Runnable {
                 for (ConsumerRecord<String, SpecificRecordBase> record : records) {
 
                     SpecificRecordBase event = record.value();
+
+                    handleEvent(event);
 
                     log.info("Получено событие хаба: {}", event);
                 }
@@ -54,7 +65,6 @@ public class HubEventProcessor implements Runnable {
     }
 
     private void handleEvent(SpecificRecordBase value) {
-
         if (!(value instanceof HubEventAvro event)) {
             log.warn("Неизвестный тип события: {}", value.getClass());
             return;
@@ -64,25 +74,17 @@ public class HubEventProcessor implements Runnable {
         String hubId = event.getHubId();
 
         try {
+            switch (payload) {
 
-            if (payload instanceof DeviceAddedEventAvro e) {
-                scenarioService.handleDeviceAdded(hubId, e);
-            }
+                case DeviceAddedEventAvro e -> scenarioService.handleDeviceAdded(hubId, e);
 
-            else if (payload instanceof DeviceRemovedEventAvro e) {
-                scenarioService.handleDeviceRemoved(hubId, e);
-            }
+                case DeviceRemovedEventAvro e -> scenarioService.handleDeviceRemoved(hubId, e);
 
-            else if (payload instanceof ScenarioAddedEventAvro e) {
-                scenarioService.handleScenarioAdded(hubId, e);
-            }
+                case ScenarioAddedEventAvro e -> scenarioService.handleScenarioAdded(hubId, e);
 
-            else if (payload instanceof ScenarioRemovedEventAvro e) {
-                scenarioService.handleScenarioRemoved(hubId, e);
-            }
+                case ScenarioRemovedEventAvro e -> scenarioService.handleScenarioRemoved(hubId, e);
 
-            else {
-                log.warn("Неизвестный payload: {}", payload.getClass());
+                default -> log.warn("Неизвестный payload: {}", payload.getClass());
             }
 
         } catch (Exception ex) {

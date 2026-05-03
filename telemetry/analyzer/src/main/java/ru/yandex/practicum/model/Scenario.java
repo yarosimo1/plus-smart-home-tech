@@ -3,6 +3,8 @@ package ru.yandex.practicum.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import ru.yandex.practicum.model.ScenarioAction;
+import ru.yandex.practicum.model.ScenarioCondition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +21,16 @@ public class Scenario {
 
     @Column(name = "hub_id")
     private String hubId;
+
     private String name;
 
-    @OneToMany(mappedBy = "scenario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "scenario",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<ScenarioCondition> conditions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "scenario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "scenario",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<ScenarioAction> actions = new ArrayList<>();
 }

@@ -5,24 +5,27 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "scenario_actions")
+@Table(name = "scenario_actions",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"scenario_id", "sensor_id", "action_id"}
+        ))
 @Getter
 @Setter
-@IdClass(ScenarioActionId.class)
 public class ScenarioAction {
 
     @Id
-    @ManyToOne
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scenario_id")
     private Scenario scenario;
 
-    @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sensor_id")
     private Sensor sensor;
 
-    @Id
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "action_id")
     private Action action;
 }

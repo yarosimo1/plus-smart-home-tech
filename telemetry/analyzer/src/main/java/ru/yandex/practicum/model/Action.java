@@ -14,6 +14,8 @@ public class Action {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private ActionType type;
+
     private Integer value;
 }

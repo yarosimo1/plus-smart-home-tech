@@ -14,7 +14,7 @@ import java.util.Properties;
 public class KafkaSnapshotConsumerConfig {
     private final KafkaConfigProperties kafkaConfigProperties;
 
-    @Bean
+    @Bean(name = "kafkaSnapshotConsumer")
     public KafkaConsumer<String, SpecificRecordBase> kafkaSnapshotConsumer() {
 
         Properties props = new Properties();

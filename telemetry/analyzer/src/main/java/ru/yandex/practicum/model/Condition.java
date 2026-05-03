@@ -14,7 +14,11 @@ public class Condition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type;
-    private String operation;
-    private Object value;
+    @Enumerated(EnumType.STRING)
+    private ConditionType type;
+
+    @Enumerated(EnumType.STRING)
+    private Operation operation;
+
+    private Integer value;
 }

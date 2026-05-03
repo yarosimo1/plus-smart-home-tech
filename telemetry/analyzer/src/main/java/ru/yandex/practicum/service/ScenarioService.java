@@ -2,6 +2,7 @@ package ru.yandex.practicum.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceRemovedEventAvro;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 import ru.yandex.practicum.model.*;
 import ru.yandex.practicum.repository.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScenarioService {
@@ -31,13 +33,19 @@ public class ScenarioService {
         scenario.setHubId(hubId);
         scenario.setName(event.getName());
 
+        scenario = scenarioRepository.save(scenario);
+
+        // чистим старые связи
+        scenarioConditionRepository.deleteAllByScenarioId(scenario.getId());
+        scenarioActionRepository.deleteAllByScenarioId(scenario.getId());
+
         scenario.getConditions().clear();
         scenario.getActions().clear();
 
-        scenario = scenarioRepository.save(scenario);
-
         processConditions(scenario, event);
         processActions(scenario, event);
+
+        scenarioRepository.save(scenario);
     }
 
     @Transactional
@@ -54,7 +62,6 @@ public class ScenarioService {
 
         String sensorId = event.getId();
 
-        // проверка: уже существует
         if (sensorRepository.existsById(sensorId)) {
             return;
         }
@@ -72,16 +79,13 @@ public class ScenarioService {
 
         String sensorId = event.getId();
 
-        // удаляем связи с условиями
         scenarioConditionRepository.deleteAllBySensorId(sensorId);
-
-        // удаляем связи с действиями
         scenarioActionRepository.deleteAllBySensorId(sensorId);
 
-        // удаляем сам сенсор
-        sensorRepository.deleteById(sensorId);
+        sensorRepository.findById(sensorId)
+                .filter(sensor -> sensor.getHubId().equals(hubId))
+                .ifPresent(sensorRepository::delete);
     }
-
 
     private void processConditions(Scenario scenario,
                                    ScenarioAddedEventAvro event) {
@@ -89,12 +93,12 @@ public class ScenarioService {
         for (var c : event.getConditions()) {
 
             Sensor sensor = sensorRepository.findById(c.getSensorId())
-                    .orElseThrow(() -> new RuntimeException("Sensor not found"));
+                    .orElseThrow(() -> new RuntimeException("Sensor not found: " + c.getSensorId()));
 
             Condition condition = new Condition();
-            condition.setType(c.getConditionType().toString());
-            condition.setOperation(c.getOperation().toString());
-            condition.setValue(c.getValue());
+            condition.setType(ConditionType.valueOf(c.getConditionType().name()));
+            condition.setOperation(Operation.valueOf(c.getOperation().name()));
+            condition.setValue(normalizeValue(c.getValue()));
 
             condition = conditionRepository.save(condition);
 
@@ -113,11 +117,11 @@ public class ScenarioService {
         for (var a : event.getActions()) {
 
             Sensor sensor = sensorRepository.findById(a.getSensorId())
-                    .orElseThrow(() -> new RuntimeException("Sensor not found"));
+                    .orElseThrow(() -> new RuntimeException("Sensor not found: " + a.getSensorId()));
 
             Action action = new Action();
-            action.setType(a.getActionType().toString());
-            action.setValue(a.getValue());
+            action.setType(ActionType.valueOf(a.getActionType().name()));
+            action.setValue(normalizeValue(a.getValue()));
 
             action = actionRepository.save(action);
 
@@ -128,5 +132,15 @@ public class ScenarioService {
 
             scenario.getActions().add(sa);
         }
+    }
+
+    private Integer normalizeValue(Object value) {
+        if (value instanceof Boolean b) {
+            return b ? 1 : 0;
+        }
+        if (value instanceof Integer i) {
+            return i;
+        }
+        throw new IllegalArgumentException("Unsupported value type: " + value);
     }
 }

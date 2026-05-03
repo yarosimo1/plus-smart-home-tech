@@ -1,10 +1,10 @@
 package ru.yandex.practicum.processors;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.KafkaConfigProperties;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
@@ -15,12 +15,21 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class SnapshotProcessor {
     private final KafkaConsumer<String, SpecificRecordBase> consumer;
     private final KafkaConfigProperties topics;
-
     private final ScenarioEngine scenarioEngine;
+
+    public SnapshotProcessor(
+            @Qualifier("kafkaSnapshotConsumer")
+            KafkaConsumer<String, SpecificRecordBase> consumer,
+            KafkaConfigProperties topics,
+            ScenarioEngine scenarioEngine
+    ) {
+        this.consumer = consumer;
+        this.topics = topics;
+        this.scenarioEngine = scenarioEngine;
+    }
 
     public void start() {
         log.info("SnapshotProcessor started");
