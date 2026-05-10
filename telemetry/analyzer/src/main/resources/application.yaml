@@ -19,7 +19,7 @@ spring:
   sql:
     init:
       mode: always
-
+#Kafka
 app:
   kafka:
     bootstrap-servers: localhost:9092
@@ -43,7 +43,7 @@ app:
     topics:
       hub: telemetry.hubs.v1
       snapshot: telemetry.snapshots.v1
-
+#RPC
 grpc:
   client:
     hub-router:
