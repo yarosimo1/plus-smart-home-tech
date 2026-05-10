@@ -1,31 +1,3 @@
-app:
-  kafka:
-    bootstrap-servers: localhost:9092
-
-    consumer:
-      snapshot:
-        group-id: snapshot-processor-group
-        value-deserializer: ru.practicum.telemetry.deserializer.SensorsSnapshotDeserializer
-      hub:
-        group-id: hub-events-group
-        value-deserializer: ru.practicum.telemetry.deserializer.HubEventDeserializer
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      enable-auto-commit: false
-      auto-offset-reset: earliest
-
-    topics:
-      hub: telemetry.hubs.v1
-      snapshot: telemetry.snapshots.v1
-
-grpc:
-  client:
-    hub-router:
-      address: 'static://localhost:59090'
-      enableKeepAlive: true
-      keepAliveWithoutCalls: true
-      negotiationType: plaintext
-
-#Database
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/smart_home
@@ -35,12 +7,47 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
-    show-sql: true
+      ddl-auto: validate
+
+    show-sql: false
+
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+
 #  sql:
 #    init:
 #      mode: always
+
+app:
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+
+      snapshot:
+        group-id: snapshot-processor-group
+        value-deserializer: ru.practicum.telemetry.deserializer.SensorsSnapshotDeserializer
+
+      hub:
+        group-id: hub-events-group
+        value-deserializer: ru.practicum.telemetry.deserializer.HubEventDeserializer
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+      enable-auto-commit: false
+
+      auto-offset-reset: earliest
+
+    topics:
+      hub: telemetry.hubs.v1
+      snapshot: telemetry.snapshots.v1
+
+grpc:
+  client:
+    hub-router:
+      address: static://localhost:59090
+      negotiationType: plaintext
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true

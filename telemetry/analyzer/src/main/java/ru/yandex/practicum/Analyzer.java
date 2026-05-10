@@ -1,17 +1,20 @@
 package ru.yandex.practicum;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ConfigurableApplicationContext;
-import ru.yandex.practicum.processors.HubEventProcessor;
-import ru.yandex.practicum.processors.SnapshotProcessor;
+import ru.yandex.practicum.processor.HubEventProcessor;
+import ru.yandex.practicum.processor.SnapshotProcessor;
 
+@Slf4j
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class Analyzer {
 
     public static void main(String[] args) {
+
         ConfigurableApplicationContext context =
                 SpringApplication.run(Analyzer.class, args);
 
@@ -21,12 +24,14 @@ public class Analyzer {
         SnapshotProcessor snapshotProcessor =
                 context.getBean(SnapshotProcessor.class);
 
-        // запускаем второй поток
-        Thread hubThread = new Thread(hubEventProcessor);
-        hubThread.setName("hub-events-thread");
-        hubThread.start();
+        Thread hubEventsThread =
+                new Thread(hubEventProcessor);
 
-        // основной поток
+        hubEventsThread.setName("hub-events-thread");
+        hubEventsThread.start();
+
+        log.info("Hub event processor thread started");
+
         snapshotProcessor.start();
     }
 }

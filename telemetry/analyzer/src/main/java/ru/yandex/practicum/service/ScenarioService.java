@@ -2,145 +2,137 @@ package ru.yandex.practicum.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceRemovedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
-import ru.yandex.practicum.model.*;
-import ru.yandex.practicum.repository.*;
+import ru.yandex.practicum.entity.*;
+import ru.yandex.practicum.entity.model.ActionType;
+import ru.yandex.practicum.entity.model.ConditionOperation;
+import ru.yandex.practicum.entity.model.ConditionType;
+import ru.yandex.practicum.kafka.telemetry.event.*;
+import ru.yandex.practicum.repository.ActionRepository;
+import ru.yandex.practicum.repository.ConditionRepository;
+import ru.yandex.practicum.repository.ScenarioRepository;
+import ru.yandex.practicum.repository.SensorRepository;
 
-@Slf4j
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ScenarioService {
 
-    private final ScenarioRepository scenarioRepository;
     private final SensorRepository sensorRepository;
+    private final ScenarioRepository scenarioRepository;
     private final ConditionRepository conditionRepository;
     private final ActionRepository actionRepository;
-    private final ScenarioActionRepository scenarioActionRepository;
-    private final ScenarioConditionRepository scenarioConditionRepository;
 
     @Transactional
-    public void handleScenarioAdded(String hubId, ScenarioAddedEventAvro event) {
+    public void addSensor(DeviceAddedEventAvro event, String hubId) {
 
-        Scenario scenario = scenarioRepository
-                .findByHubIdAndName(hubId, event.getName())
-                .orElseGet(Scenario::new);
-
-        scenario.setHubId(hubId);
-        scenario.setName(event.getName());
-
-        scenario = scenarioRepository.save(scenario);
-
-        // чистим старые связи
-        scenarioConditionRepository.deleteAllByScenarioId(scenario.getId());
-        scenarioActionRepository.deleteAllByScenarioId(scenario.getId());
-
-        scenario.getConditions().clear();
-        scenario.getActions().clear();
-
-        processConditions(scenario, event);
-        processActions(scenario, event);
-
-        scenarioRepository.save(scenario);
-    }
-
-    @Transactional
-    public void handleScenarioRemoved(String hubId,
-                                      ScenarioRemovedEventAvro event) {
-
-        scenarioRepository.findByHubIdAndName(hubId, event.getName())
-                .ifPresent(scenarioRepository::delete);
-    }
-
-    @Transactional
-    public void handleDeviceAdded(String hubId,
-                                  DeviceAddedEventAvro event) {
-
-        String sensorId = event.getId();
-
-        if (sensorRepository.existsById(sensorId)) {
+        if (sensorRepository.existsById(event.getId().toString())) {
             return;
         }
 
-        Sensor sensor = new Sensor();
-        sensor.setId(sensorId);
-        sensor.setHubId(hubId);
+        Sensor sensor = Sensor.builder()
+                .id(event.getId().toString())
+                .hubId(hubId)
+                .build();
 
         sensorRepository.save(sensor);
     }
 
     @Transactional
-    public void handleDeviceRemoved(String hubId,
-                                    DeviceRemovedEventAvro event) {
-
-        String sensorId = event.getId();
-
-        scenarioConditionRepository.deleteAllBySensorId(sensorId);
-        scenarioActionRepository.deleteAllBySensorId(sensorId);
-
-        sensorRepository.findById(sensorId)
-                .filter(sensor -> sensor.getHubId().equals(hubId))
-                .ifPresent(sensorRepository::delete);
+    public void removeSensor(DeviceRemovedEventAvro event) {
+        sensorRepository.deleteById(event.getId().toString());
     }
 
-    private void processConditions(Scenario scenario,
-                                   ScenarioAddedEventAvro event) {
+    @Transactional
+    public void addScenario(ScenarioAddedEventAvro event, String hubId) {
 
-        for (var c : event.getConditions()) {
+        Scenario scenario = scenarioRepository
+                .findByHubIdAndName(
+                        hubId,
+                        event.getName().toString()
+                )
+                .orElseGet(() -> Scenario.builder()
+                        .hubId(hubId)
+                        .name(event.getName().toString())
+                        .build());
 
-            Sensor sensor = sensorRepository.findById(c.getSensorId())
-                    .orElseThrow(() -> new RuntimeException("Sensor not found: " + c.getSensorId()));
+        scenario.getConditions().clear();
+        scenario.getActions().clear();
 
-            Condition condition = new Condition();
-            condition.setType(ConditionType.valueOf(c.getConditionType().name()));
-            condition.setOperation(Operation.valueOf(c.getOperation().name()));
-            condition.setValue(normalizeValue(c.getValue()));
+        for (ScenarioConditionAvro conditionAvro : event.getConditions()) {
+
+            Condition condition = Condition.builder()
+                    .type(ConditionType.valueOf(
+                            conditionAvro.getConditionType().name()
+                    ))
+                    .operation(ConditionOperation.valueOf(
+                            conditionAvro.getOperation().name()
+                    ))
+                    .value(extractConditionValue(conditionAvro))
+                    .build();
 
             condition = conditionRepository.save(condition);
 
-            ScenarioCondition sc = new ScenarioCondition();
-            sc.setScenario(scenario);
-            sc.setSensor(sensor);
-            sc.setCondition(condition);
+            ScenarioCondition scenarioCondition =
+                    ScenarioCondition.builder()
+                            .scenario(scenario)
+                            .sensorId(conditionAvro.getSensorId().toString())
+                            .condition(condition)
+                            .build();
 
-            scenario.getConditions().add(sc);
+            scenario.getConditions().add(scenarioCondition);
         }
-    }
 
-    private void processActions(Scenario scenario,
-                                ScenarioAddedEventAvro event) {
+        for (DeviceActionAvro actionAvro : event.getActions()) {
 
-        for (var a : event.getActions()) {
-
-            Sensor sensor = sensorRepository.findById(a.getSensorId())
-                    .orElseThrow(() -> new RuntimeException("Sensor not found: " + a.getSensorId()));
-
-            Action action = new Action();
-            action.setType(ActionType.valueOf(a.getActionType().name()));
-            action.setValue(normalizeValue(a.getValue()));
+            Action action = Action.builder()
+                    .type(ActionType.valueOf(
+                            actionAvro.getActionType().name()
+                    ))
+                    .value(actionAvro.getValue())
+                    .build();
 
             action = actionRepository.save(action);
 
-            ScenarioAction sa = new ScenarioAction();
-            sa.setScenario(scenario);
-            sa.setSensor(sensor);
-            sa.setAction(action);
+            ScenarioAction scenarioAction =
+                    ScenarioAction.builder()
+                            .scenario(scenario)
+                            .sensorId(actionAvro.getSensorId().toString())
+                            .action(action)
+                            .build();
 
-            scenario.getActions().add(sa);
+            scenario.getActions().add(scenarioAction);
         }
+
+        scenarioRepository.save(scenario);
     }
 
-    private Integer normalizeValue(Object value) {
-        if (value instanceof Boolean b) {
-            return b ? 1 : 0;
-        }
+    @Transactional
+    public void removeScenario(ScenarioRemovedEventAvro event, String hubId) {
+
+        scenarioRepository.findByHubIdAndName(
+                hubId,
+                event.getName().toString()
+        ).ifPresent(scenarioRepository::delete);
+    }
+
+    public List<Scenario> getScenarios(String hubId) {
+        return scenarioRepository.findByHubId(hubId);
+    }
+
+    private Integer extractConditionValue(ScenarioConditionAvro condition) {
+
+        Object value = condition.getValue();
+
         if (value instanceof Integer i) {
             return i;
         }
-        throw new IllegalArgumentException("Unsupported value type: " + value);
+
+        if (value instanceof Boolean b) {
+            return b ? 1 : 0;
+        }
+
+        return null;
     }
 }

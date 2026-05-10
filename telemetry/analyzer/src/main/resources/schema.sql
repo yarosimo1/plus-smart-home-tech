@@ -27,22 +27,18 @@ CREATE TABLE IF NOT EXISTS actions (
     value INTEGER
 );
 
--- создаём таблицу scenario_conditions, связывающую сценарий, датчик и условие активации сценария
 CREATE TABLE IF NOT EXISTS scenario_conditions (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     scenario_id BIGINT REFERENCES scenarios(id),
-    sensor_id VARCHAR REFERENCES sensors(id),
-    condition_id BIGINT REFERENCES conditions(id),
-    UNIQUE (scenario_id, sensor_id, condition_id)
+    sensor_id VARCHAR,
+    condition_id BIGINT REFERENCES conditions(id)
 );
 
--- создаём таблицу scenario_actions, связывающую сценарий, датчик и действие, которое нужно выполнить при активации сценария
-CREATE TABLE scenario_actions (
-    id BIGSERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS scenario_actions (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     scenario_id BIGINT REFERENCES scenarios(id),
-    sensor_id VARCHAR REFERENCES sensors(id),
-    action_id BIGINT REFERENCES actions(id),
-    UNIQUE (scenario_id, sensor_id, action_id)
+    sensor_id VARCHAR,
+    action_id BIGINT REFERENCES actions(id)
 );
 
 -- создаём функцию для проверки, что связываемые сценарий и датчик работают с одним и тем же хабом
