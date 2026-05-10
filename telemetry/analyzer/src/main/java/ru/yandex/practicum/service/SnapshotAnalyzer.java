@@ -69,7 +69,7 @@ public class SnapshotAnalyzer {
 
         SensorStateAvro sensorState =
                 snapshot.getSensorsState()
-                        .get(scenarioCondition.getSensorId());
+                        .get(scenarioCondition.getSensor().getId());
 
         if (sensorState == null) {
             return false;
@@ -252,7 +252,7 @@ public class SnapshotAnalyzer {
 
             DeviceActionProto.Builder actionBuilder =
                     DeviceActionProto.newBuilder()
-                            .setSensorId(scenarioAction.getSensorId())
+                            .setSensorId(scenarioAction.getSensor().getId())
                             .setType(
                                     ActionTypeProto.valueOf(
                                             scenarioAction.getAction()
@@ -281,7 +281,7 @@ public class SnapshotAnalyzer {
                     "Executing action: hubId={}, scenario={}, sensorId={}, action={}",
                     snapshot.getHubId(),
                     scenario.getName(),
-                    scenarioAction.getSensorId(),
+                    scenarioAction.getSensor().getId(),
                     scenarioAction.getAction().getType().name()
             );
 

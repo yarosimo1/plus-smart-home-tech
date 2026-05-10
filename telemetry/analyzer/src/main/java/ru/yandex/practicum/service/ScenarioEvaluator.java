@@ -36,7 +36,7 @@ public class ScenarioEvaluator {
 
         SensorStateAvro state =
                 snapshot.getSensorsState()
-                        .get(condition.getSensorId());
+                        .get(condition.getSensor().getId());
 
         if (state == null) {
             return false;

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.config.KafkaConfigProperties;
@@ -38,25 +39,24 @@ public class HubEventProcessor implements Runnable {
 
     @Override
     public void run() {
+        try {
+            consumer.subscribe(Collections.singleton(kafkaConfig.getTopics().getHub()));
+            while (running) {
+                var records = consumer.poll(Duration.ofSeconds(1));
 
-        consumer.subscribe(
-                Collections.singleton(
-                        kafkaConfig.getTopics().getHub()
-                )
-        );
-
-        while (running) {
-
-            var records = consumer.poll(Duration.ofSeconds(1));
-
-            for (ConsumerRecord<String, SpecificRecordBase> record : records) {
-
-                HubEventAvro event = (HubEventAvro) record.value();
-
-                process(event);
+                for (ConsumerRecord<String, SpecificRecordBase> record : records) {
+                    HubEventAvro event = (HubEventAvro) record.value();
+                    process(event);
+                }
+                consumer.commitSync();
             }
-
-            consumer.commitSync();
+        } catch (WakeupException e) {
+            log.info("HubEventProcessor stopped");
+        } catch (Exception e) {
+            log.error("Error in HubEventProcessor", e);
+        } finally {
+            consumer.close();
+            log.info("Kafka consumer closed");
         }
     }
 

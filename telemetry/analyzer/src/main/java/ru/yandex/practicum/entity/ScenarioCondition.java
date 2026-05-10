@@ -12,18 +12,21 @@ import lombok.*;
 @Builder
 public class ScenarioCondition {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private ScenarioConditionId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scenario_id", nullable = false)
+    @MapsId("scenarioId")
+    @JoinColumn(name = "scenario_id")
     private Scenario scenario;
 
-    @Column(name = "sensor_id", nullable = false)
-    private String sensorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("sensorId")
+    @JoinColumn(name = "sensor_id")
+    private Sensor sensor;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "condition_id", nullable = false)
+    @MapsId("conditionId")
+    @JoinColumn(name = "condition_id")
     private Condition condition;
 }

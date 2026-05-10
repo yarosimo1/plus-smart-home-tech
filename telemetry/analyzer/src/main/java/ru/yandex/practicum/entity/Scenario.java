@@ -29,6 +29,7 @@ public class Scenario {
 
     private String name;
 
+    @Builder.Default
     @OneToMany(
             mappedBy = "scenario",
             cascade = CascadeType.ALL,
@@ -36,6 +37,7 @@ public class Scenario {
     )
     private Set<ScenarioCondition> conditions = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(
             mappedBy = "scenario",
             cascade = CascadeType.ALL,

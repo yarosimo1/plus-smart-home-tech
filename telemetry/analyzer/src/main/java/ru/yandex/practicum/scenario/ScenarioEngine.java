@@ -71,7 +71,7 @@ public class ScenarioEngine {
 
         SensorStateAvro state =
                 snapshot.getSensorsState()
-                        .get(conditionLink.getSensorId());
+                        .get(conditionLink.getSensor().getId());
 
         if (state == null) {
             return false;
@@ -175,7 +175,7 @@ public class ScenarioEngine {
             actionExecutor.execute(
                     snapshot.getHubId().toString(),
                     scenario.getName(),
-                    actionLink.getSensorId(),
+                    actionLink.getSensor().getId(),
                     actionLink.getAction()
             );
         }
