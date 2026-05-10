@@ -13,21 +13,40 @@ import java.util.stream.Collectors;
 
 @Component
 public class EventFactory {
-    private final Map<SensorEventProto.PayloadCase, SensorEventHandler> sensorEventHandlers;
-    private final Map<HubEventProto.PayloadCase, HubEventHandler> hubEventHandlers;
 
-    public EventFactory(Set<SensorEventHandler> sensorEventHandlers, Set<HubEventHandler> hubEventHandlerSet) {
-        this.sensorEventHandlers = sensorEventHandlers.stream()
-                .collect(Collectors.toMap(SensorEventHandler::getMessageType, Function.identity()));
-        this.hubEventHandlers = hubEventHandlerSet.stream()
-                .collect(Collectors.toMap(HubEventHandler::getMessageType, Function.identity()));
+    private final Map<SensorEventProto.PayloadCase, SensorEventHandler>
+            sensorEventHandlers;
+
+    private final Map<HubEventProto.PayloadCase, HubEventHandler>
+            hubEventHandlers;
+
+    public EventFactory(
+            Set<SensorEventHandler> sensorHandlers,
+            Set<HubEventHandler> hubHandlers
+    ) {
+
+        this.sensorEventHandlers = sensorHandlers.stream()
+                .collect(Collectors.toUnmodifiableMap(
+                        SensorEventHandler::getMessageType,
+                        Function.identity()
+                ));
+
+        this.hubEventHandlers = hubHandlers.stream()
+                .collect(Collectors.toUnmodifiableMap(
+                        HubEventHandler::getMessageType,
+                        Function.identity()
+                ));
     }
 
-    public SensorEventHandler getSensorEvetnHandler(SensorEventProto.PayloadCase eventType) {
-        return sensorEventHandlers.get(eventType);
+    public SensorEventHandler getSensorEventHandler(
+            SensorEventProto.PayloadCase payloadCase
+    ) {
+        return sensorEventHandlers.get(payloadCase);
     }
 
-    public HubEventHandler getHubEventHandler(HubEventProto.PayloadCase eventType) {
-        return hubEventHandlers.get(eventType);
+    public HubEventHandler getHubEventHandler(
+            HubEventProto.PayloadCase payloadCase
+    ) {
+        return hubEventHandlers.get(payloadCase);
     }
 }

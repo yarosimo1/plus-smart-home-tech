@@ -3,37 +3,46 @@ package ru.practicum.collector.handler.hub;
 import org.apache.avro.specific.SpecificRecordBase;
 import ru.practicum.collector.handler.kafka.KafkaEventProducer;
 import ru.practicum.collector.handler.kafka.config.KafkaConfigProperties;
+import ru.practicum.collector.mapper.ProtoTimestampMapper;
 import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 
-import java.time.Instant;
+public abstract class BaseHubEventHandler<T extends SpecificRecordBase>
+        implements HubEventHandler {
 
-public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
     private final KafkaEventProducer kafkaEventProducer;
-    private final KafkaConfigProperties topics;
+    private final KafkaConfigProperties properties;
 
-    public BaseHubEventHandler(KafkaEventProducer kafkaEventProducer, KafkaConfigProperties topics) {
+    protected BaseHubEventHandler(
+            KafkaEventProducer kafkaEventProducer,
+            KafkaConfigProperties properties
+    ) {
+
         this.kafkaEventProducer = kafkaEventProducer;
-        this.topics = topics;
+        this.properties = properties;
     }
 
     @Override
     public void handle(HubEventProto event) {
+
         T payload = mapToAvro(event);
 
         HubEventAvro avro = HubEventAvro.newBuilder()
                 .setHubId(event.getHubId())
-                .setTimestamp(Instant.ofEpochSecond(event.getTimestamp().getSeconds(),
-                        event.getTimestamp().getNanos()))
+                .setTimestamp(
+                        ProtoTimestampMapper.toInstant(
+                                event.getTimestamp()
+                        )
+                )
                 .setPayload(payload)
                 .build();
 
         kafkaEventProducer.send(
-                topics.getTopics().getHubs(),
+                properties.getTopics().getHubs(),
                 event.getHubId(),
                 avro
         );
     }
 
-    public abstract T mapToAvro(HubEventProto event);
+    protected abstract T mapToAvro(HubEventProto event);
 }

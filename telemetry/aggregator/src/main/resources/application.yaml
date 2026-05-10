@@ -4,12 +4,12 @@ app:
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: ru.practicum.serializer.AvroSerializer
+      value-serializer: ru.practicum.telemetry.serializer.AvroSerializer
 
     consumer:
       group-id: sensor-aggregator-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer:  ru.yandex.practicum.kafka.deserializer.SensorEventDeserializer
+      value-deserializer: ru.practicum.telemetry.deserializer.SensorEventDeserializer
       enable-auto-commit: false
       auto-offset-reset: earliest
 

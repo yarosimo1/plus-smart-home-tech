@@ -1,9 +1,9 @@
 package ru.practicum.collector.handler.hub;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.collector.handler.hub.mapper.HubMapper;
 import ru.practicum.collector.handler.kafka.KafkaEventProducer;
 import ru.practicum.collector.handler.kafka.config.KafkaConfigProperties;
-import ru.practicum.collector.model.hub.mapper.HubMapper;
 import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.grpc.telemetry.event.ScenarioAddedEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
