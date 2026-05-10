@@ -16,9 +16,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-#  sql:
-#    init:
-#      mode: always
+  sql:
+    init:
+      mode: always
 
 app:
   kafka:
