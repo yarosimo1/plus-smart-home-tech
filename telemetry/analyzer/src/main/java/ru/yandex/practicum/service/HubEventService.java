@@ -2,20 +2,21 @@ package ru.yandex.practicum.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HubEventService {
-
     private final ScenarioService scenarioService;
 
     @Transactional
     public void handle(HubEventAvro event) {
+        Object payload = event.getPayload();
 
-        switch (event.getPayload()) {
-
+        switch (payload) {
             case DeviceAddedEventAvro added -> scenarioService.addSensor(
                     added,
                     event.getHubId()
@@ -35,8 +36,10 @@ public class HubEventService {
                     event.getHubId()
             );
 
-            default -> throw new IllegalArgumentException(
-                    "Unknown event type: " + event.getPayload().getClass()
+            default -> log.warn(
+                    "Unknown hub event type: {}, hubId={}",
+                    payload.getClass().getName(),
+                    event.getHubId()
             );
         }
     }
