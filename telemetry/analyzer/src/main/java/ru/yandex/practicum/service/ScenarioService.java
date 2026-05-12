@@ -14,11 +14,14 @@ import ru.yandex.practicum.repository.ScenarioRepository;
 import ru.yandex.practicum.repository.SensorRepository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ScenarioService {
-
     private final SensorRepository sensorRepository;
     private final ScenarioRepository scenarioRepository;
     private final ConditionRepository conditionRepository;
@@ -26,7 +29,6 @@ public class ScenarioService {
 
     @Transactional
     public void addSensor(DeviceAddedEventAvro event, String hubId) {
-
         String sensorId = event.getId().toString();
 
         if (sensorRepository.existsById(sensorId)) {
@@ -43,7 +45,6 @@ public class ScenarioService {
 
     @Transactional
     public void removeSensor(DeviceRemovedEventAvro event) {
-
         sensorRepository.deleteById(
                 event.getId().toString()
         );
@@ -67,44 +68,42 @@ public class ScenarioService {
                                 .build()
                 );
 
-        /*
-         * IMPORTANT:
-         * Scenario must already have ID
-         * before composite keys are created.
-         */
         scenario = scenarioRepository.save(scenario);
 
         scenario.getConditions().clear();
         scenario.getActions().clear();
 
         /*
+         * Загружаем все sensor одним запросом
+         */
+        Set<String> sensorIds = collectSensorIds(event);
+
+        Map<String, Sensor> sensors = sensorRepository
+                .findAllByIdIn(sensorIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        Sensor::getId,
+                        Function.identity()
+                ));
+
+        /*
          * CONDITIONS
          */
         for (ScenarioConditionAvro conditionAvro : event.getConditions()) {
+            String sensorId =
+                    conditionAvro.getSensorId().toString();
 
-            Sensor sensor = sensorRepository.findById(
-                    conditionAvro.getSensorId().toString()
-            ).orElseThrow(() ->
-                    new IllegalArgumentException(
-                            "Sensor not found: "
-                                    + conditionAvro.getSensorId()
-                    )
+            Sensor sensor = getSensorOrThrow(
+                    sensors,
+                    sensorId
             );
 
             Condition condition = Condition.builder()
-                    .type(
-                            ConditionType.valueOf(
-                                    conditionAvro.getConditionType().name()
-                            )
-                    )
-                    .operation(
-                            ConditionOperation.valueOf(
-                                    conditionAvro.getOperation().name()
-                            )
-                    )
-                    .value(
-                            extractConditionValue(conditionAvro)
-                    )
+                    .type(ConditionType.valueOf(
+                            conditionAvro.getConditionType().name()))
+                    .operation(ConditionOperation.valueOf(
+                            conditionAvro.getOperation().name()))
+                    .value(extractConditionValue(conditionAvro))
                     .build();
 
             condition = conditionRepository.save(condition);
@@ -130,22 +129,17 @@ public class ScenarioService {
          * ACTIONS
          */
         for (DeviceActionAvro actionAvro : event.getActions()) {
+            String sensorId =
+                    actionAvro.getSensorId().toString();
 
-            Sensor sensor = sensorRepository.findById(
-                    actionAvro.getSensorId().toString()
-            ).orElseThrow(() ->
-                    new IllegalArgumentException(
-                            "Sensor not found: "
-                                    + actionAvro.getSensorId()
-                    )
+            Sensor sensor = getSensorOrThrow(
+                    sensors,
+                    sensorId
             );
 
             Action action = Action.builder()
-                    .type(
-                            ActionType.valueOf(
-                                    actionAvro.getActionType().name()
-                            )
-                    )
+                    .type(ActionType.valueOf(
+                            actionAvro.getActionType().name()))
                     .value(actionAvro.getValue())
                     .build();
 
@@ -176,7 +170,6 @@ public class ScenarioService {
             ScenarioRemovedEventAvro event,
             String hubId
     ) {
-
         scenarioRepository.findByHubIdAndName(
                 hubId,
                 event.getName().toString()
@@ -184,14 +177,51 @@ public class ScenarioService {
     }
 
     public List<Scenario> getScenarios(String hubId) {
-
         return scenarioRepository.findByHubId(hubId);
+    }
+
+    private Set<String> collectSensorIds(
+            ScenarioAddedEventAvro event
+    ) {
+
+        Set<String> conditionSensorIds =
+                event.getConditions()
+                        .stream()
+                        .map(condition ->
+                                condition.getSensorId().toString()
+                        )
+                        .collect(Collectors.toSet());
+
+        Set<String> actionSensorIds =
+                event.getActions()
+                        .stream()
+                        .map(action ->
+                                action.getSensorId().toString()
+                        )
+                        .collect(Collectors.toSet());
+
+        conditionSensorIds.addAll(actionSensorIds);
+
+        return conditionSensorIds;
+    }
+
+    private Sensor getSensorOrThrow(
+            Map<String, Sensor> sensors,
+            String sensorId
+    ) {
+        Sensor sensor = sensors.get(sensorId);
+
+        if (sensor == null) {
+            throw new IllegalArgumentException(
+                    "Sensor not found: " + sensorId
+            );
+        }
+        return sensor;
     }
 
     private Integer extractConditionValue(
             ScenarioConditionAvro condition
     ) {
-
         Object value = condition.getValue();
 
         if (value instanceof Integer i) {
@@ -202,6 +232,9 @@ public class ScenarioService {
             return b ? 1 : 0;
         }
 
-        return null;
+        throw new IllegalArgumentException(
+                "Unsupported condition value type: "
+                        + value.getClass().getName()
+        );
     }
 }

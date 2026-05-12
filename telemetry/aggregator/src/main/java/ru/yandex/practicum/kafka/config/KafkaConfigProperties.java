@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "app.kafka")
 public class KafkaConfigProperties {
     private String bootstrapServers;
+    private Long pollTimeoutMs;
 
     private Producer producer = new Producer();
     private Topics topics = new Topics();

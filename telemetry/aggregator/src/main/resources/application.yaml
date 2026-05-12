@@ -2,6 +2,8 @@ app:
   kafka:
     bootstrap-servers: localhost:9092
 
+    poll-timeout-ms: 1000
+
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: ru.practicum.telemetry.serializer.AvroSerializer

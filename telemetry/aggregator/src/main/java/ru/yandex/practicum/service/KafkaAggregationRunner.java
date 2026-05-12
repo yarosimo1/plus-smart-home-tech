@@ -10,6 +10,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.config.KafkaConfigProperties;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
+import ru.yandex.practicum.producer.SnapshotProducer;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -18,36 +19,24 @@ import java.util.Collections;
 @Component
 @RequiredArgsConstructor
 public class KafkaAggregationRunner {
-
-    private static final Duration POLL_TIMEOUT =
-            Duration.ofSeconds(1);
-
     private final KafkaConsumer<String, SpecificRecordBase> consumer;
     private final KafkaConfigProperties properties;
-    private final AggregationService aggregationService;
-
+    private final SnapshotService snapshotService;
+    private final SnapshotProducer producer;
     private volatile boolean running = true;
 
     public void run() {
+        consumer.subscribe(Collections.singletonList(properties.getTopics().getSensors()));
 
-        consumer.subscribe(
-                Collections.singletonList(
-                        properties.getTopics().getSensors()
-                )
-        );
+        log.info("Kafka consumer subscribed to topic: {}", properties.getTopics().getSensors());
 
-        log.info("Kafka consumer subscribed to topic: {}",
-                properties.getTopics().getSensors());
+        Duration pollTimeout = Duration.ofMillis(properties.getPollTimeoutMs());
 
         try {
-
             while (running) {
-
-                ConsumerRecords<String, SpecificRecordBase> records =
-                        consumer.poll(POLL_TIMEOUT);
+                ConsumerRecords<String, SpecificRecordBase> records = consumer.poll(pollTimeout);
 
                 for (ConsumerRecord<String, SpecificRecordBase> record : records) {
-
                     processRecord(record);
                 }
 
@@ -55,39 +44,27 @@ public class KafkaAggregationRunner {
                     consumer.commitSync();
                 }
             }
-
         } catch (WakeupException e) {
-
             if (running) {
                 throw e;
             }
-
         } catch (Exception e) {
-
             log.error("Error during aggregation polling", e);
-
         } finally {
-
             consumer.close();
-
             log.info("Kafka consumer closed");
         }
     }
 
     public void stop() {
-
         running = false;
-
         consumer.wakeup();
     }
 
-    private void processRecord(
-            ConsumerRecord<String, SpecificRecordBase> record
-    ) {
+    private void processRecord(ConsumerRecord<String, SpecificRecordBase> record) {
+        SensorEventAvro event = (SensorEventAvro) record.value();
 
-        SensorEventAvro event =
-                (SensorEventAvro) record.value();
-
-        aggregationService.handle(event);
+        snapshotService.updateState(event)
+                .ifPresent(producer::send);
     }
 }

@@ -22,4 +22,6 @@ public interface SensorRepository extends JpaRepository<Sensor, String> {
             "actions.action"
     })
     List<Scenario> findByHubId(String hubId);
+
+    List<Sensor> findAllByIdIn(Collection<String> ids);
 }

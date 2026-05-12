@@ -1,11 +1,11 @@
 package ru.yandex.practicum.kafka.config;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
 import java.util.Properties;
 
@@ -15,7 +15,7 @@ public class KafkaProducerConfig {
     private final KafkaConfigProperties kafkaConfigProperties;
 
     @Bean
-    public KafkaProducer<String, SpecificRecordBase> kafkaProducer() {
+    public KafkaProducer<String, SensorsSnapshotAvro> kafkaProducer() {
 
         Properties props = new Properties();
 

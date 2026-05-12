@@ -1,6 +1,7 @@
 package ru.yandex.practicum.grpc;
 
 import com.google.protobuf.Timestamp;
+import io.grpc.StatusRuntimeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
@@ -25,14 +26,15 @@ public class ActionExecutor {
             String hubId,
             String scenarioName,
             String sensorId,
-            Action action
-    ) {
+            Action action) {
 
         DeviceActionProto.Builder actionProto =
                 DeviceActionProto.newBuilder()
                         .setSensorId(sensorId)
                         .setType(
-                                ActionTypeProto.valueOf(action.getType().name())
+                                ActionTypeProto.valueOf(
+                                        action.getType().name()
+                                )
                         );
 
         if (action.getValue() != null) {
@@ -54,13 +56,25 @@ public class ActionExecutor {
                         )
                         .build();
 
-        hubRouterClient.handleDeviceAction(request);
+        try {
+            hubRouterClient.handleDeviceAction(request);
 
-        log.info(
-                "Action sent: hub={}, scenario={}, sensor={}",
-                hubId,
-                scenarioName,
-                sensorId
-        );
+            log.info(
+                    "Action sent: hub={}, scenario={}, sensor={}",
+                    hubId,
+                    scenarioName,
+                    sensorId
+            );
+
+        } catch (StatusRuntimeException e) {
+            log.error(
+                    "Failed to send action: hub={}, scenario={}, sensor={}, grpcStatus={}",
+                    hubId,
+                    scenarioName,
+                    sensorId,
+                    e.getStatus(),
+                    e
+            );
+        }
     }
 }
