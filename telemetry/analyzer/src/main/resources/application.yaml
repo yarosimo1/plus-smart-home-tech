@@ -2,7 +2,13 @@ spring:
   application:
     name: analyzer
   config:
+    fail-fast: true
+    retry:
+      useRandomPolicy: true
+      max-interval: 10000
+
     import: "configserver:"
+
   cloud:
     config:
       discovery:
