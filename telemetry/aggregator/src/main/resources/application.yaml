@@ -4,8 +4,10 @@ spring:
   config:
     fail-fast: true
     retry:
-      useRandomPolicy: true
-      max-interval: 10000
+      initial-interval: 2000
+      multiplier: 1.5
+      max-interval: 1000
+      max-attempts: 20
 
     import: "configserver:"
 
