@@ -1,9 +1,15 @@
-spring:
-  application:
-    name: collector
-  config:
-    fail-fast: true
-    retry:
-      useRandomPolicy: true
-      max-interval: 10000
-    import: configserver:http://localhost:8888
+app:
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.practicum.telemetry.serializer.AvroSerializer
+
+    topics:
+      sensors: telemetry.sensors.v1
+      hubs: telemetry.hubs.v1
+
+grpc:
+  server:
+    port: 59091

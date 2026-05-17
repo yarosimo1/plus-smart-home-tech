@@ -1,9 +1,53 @@
 spring:
-  application:
-    name: analyzer
-  config:
-    fail-fast: true
-    retry:
-      useRandomPolicy: true
-      max-interval: 10000
-    import: configserver:http://localhost:8888
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smart_home
+    username: postgres
+    password: 12345
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+    show-sql: false
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  sql:
+    init:
+      mode: always
+#Kafka
+app:
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+
+      snapshot:
+        group-id: snapshot-processor-group
+        value-deserializer: ru.practicum.telemetry.deserializer.SensorsSnapshotDeserializer
+
+      hub:
+        group-id: hub-events-group
+        value-deserializer: ru.practicum.telemetry.deserializer.HubEventDeserializer
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+      enable-auto-commit: false
+
+      auto-offset-reset: earliest
+
+    topics:
+      hub: telemetry.hubs.v1
+      snapshot: telemetry.snapshots.v1
+#RPC
+grpc:
+  client:
+    hub-router:
+      address: static://localhost:59090
+      negotiationType: plaintext
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
