@@ -4,8 +4,12 @@ app:
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: ru.practicum.serializer.AvroSerializer
+      value-serializer: ru.practicum.telemetry.serializer.AvroSerializer
 
     topics:
       sensors: telemetry.sensors.v1
       hubs: telemetry.hubs.v1
+
+grpc:
+  server:
+    port: 59091

@@ -3,9 +3,8 @@ package ru.practicum.collector.handler.hub;
 import org.springframework.stereotype.Component;
 import ru.practicum.collector.handler.kafka.KafkaEventProducer;
 import ru.practicum.collector.handler.kafka.config.KafkaConfigProperties;
-import ru.practicum.collector.model.hub.event.HubEvent;
-import ru.practicum.collector.model.hub.event.HubEventType;
-import ru.practicum.collector.model.hub.event.device.DeviceRemovedEvent;
+import ru.yandex.practicum.grpc.telemetry.event.DeviceRemovedEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceRemovedEventAvro;
 
 @Component(value = "DEVICE_REMOVED")
@@ -15,15 +14,15 @@ public class DeviceRemovedHandler extends BaseHubEventHandler<DeviceRemovedEvent
     }
 
     @Override
-    public DeviceRemovedEventAvro mapToAvro(HubEvent event) {
-        DeviceRemovedEvent _event = (DeviceRemovedEvent) event;
+    public DeviceRemovedEventAvro mapToAvro(HubEventProto event) {
+        DeviceRemovedEventProto _event = event.getDeviceRemoved();
         return DeviceRemovedEventAvro.newBuilder()
                 .setId(_event.getId())
                 .build();
     }
 
     @Override
-    public HubEventType getMessageType() {
-        return HubEventType.DEVICE_REMOVED;
+    public HubEventProto.PayloadCase getMessageType() {
+        return HubEventProto.PayloadCase.DEVICE_REMOVED;
     }
 }

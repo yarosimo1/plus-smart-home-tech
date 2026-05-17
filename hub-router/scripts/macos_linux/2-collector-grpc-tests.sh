@@ -13,8 +13,8 @@ else
     --hub-router.execution.mode=COLLECTION \
     --hub-router.execution.collector.mode=grpc \
     --hub-router.execution.immediate-logging.enabled=false \
-    --hub-router.execution.output.info-enabled=true \
-    --hub-router.execution.output.trace-enabled=true \
+    --hub-router.execution.output.info-enabled=false \
+    --hub-router.execution.output.trace-enabled=false \
     --hub-router.execution.output.console=true \
     --hub-router.execution.output.file=false \
     --hub-router.skip-summary-on-startup=false
