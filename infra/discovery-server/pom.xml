@@ -31,7 +31,7 @@
     </properties>
 
     <build>
-        <finalName>discovery-server</finalName>
+        <finalName>discovery-server-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
