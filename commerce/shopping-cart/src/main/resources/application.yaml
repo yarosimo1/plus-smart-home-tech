@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: shopping-cart
+  config:
+    import: "optional:configserver:"
+    fail-fast: false
+    retry:
+      initial-interval: 2000
+      multiplier: 1.5
+      max-interval: 10000
+      max-attempts: 20
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+      fail-fast: false
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname:localhost}:${eureka.instance.port:8761}/eureka/
+server:
+  port: 0

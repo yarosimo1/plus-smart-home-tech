@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: ${SHOPPING_CART_DB_URL:jdbc:postgresql://localhost:5434/shopping_cart}
+    username: ${SHOPPING_CART_DB_USERNAME:shopping_cart}
+    password: ${SHOPPING_CART_DB_PASSWORD:shopping_cart}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
