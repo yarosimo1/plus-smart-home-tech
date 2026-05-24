@@ -13,7 +13,7 @@ public record ProductDto(
         @NotBlank String description,
         String imageSrc,
         @NotNull QuantityState quantityState,
-        @NotNull ProductState productState,
+        ProductState productState,
         @NotNull ProductCategory productCategory,
         @NotNull @DecimalMin("1.0") BigDecimal price
 ) {

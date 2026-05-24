@@ -4,8 +4,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.interactionapi.dto.store.ProductDto;
 import ru.yandex.practicum.shoppingstore.model.Product;
 
-import java.util.UUID;
-
 @Component
 public class ProductMapper {
 
@@ -24,7 +22,8 @@ public class ProductMapper {
 
     public Product toEntity(ProductDto dto) {
         Product product = new Product();
-        product.setProductId(dto.productId() == null ? UUID.randomUUID() : dto.productId());
+
+        product.setProductId(dto.productId());
         product.setProductName(dto.productName());
         product.setDescription(dto.description());
         product.setImageSrc(dto.imageSrc());
@@ -32,6 +31,7 @@ public class ProductMapper {
         product.setProductState(dto.productState());
         product.setProductCategory(dto.productCategory());
         product.setPrice(dto.price());
+
         return product;
     }
 }

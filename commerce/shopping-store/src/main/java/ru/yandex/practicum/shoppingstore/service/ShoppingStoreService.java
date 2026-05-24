@@ -24,9 +24,7 @@ public class ShoppingStoreService {
     private final ProductRepository repository;
     private final ProductMapper mapper;
 
-    public Page<ProductDto> getProducts(ProductCategory category,
-                                        Pageable pageable) {
-
+    public Page<ProductDto> getProducts(ProductCategory category, Pageable pageable) {
         return repository
                 .findAllByProductCategoryAndProductState(
                         category,
@@ -37,33 +35,20 @@ public class ShoppingStoreService {
     }
 
     public ProductDto createProduct(ProductDto dto) {
+        Product product = mapper.toEntity(dto);
 
-        Product product = new Product();
+        if (product.getProductId() == null) {
+            product.setProductId(UUID.randomUUID());
+        }
 
-        product.setProductId(UUID.randomUUID());
-        product.setProductName(dto.productName());
-        product.setDescription(dto.description());
-        product.setImageSrc(dto.imageSrc());
-        product.setPrice(dto.price());
-        product.setProductCategory(dto.productCategory());
-
-        product.setProductState(
-                dto.productState() != null
-                        ? dto.productState()
-                        : ProductState.ACTIVE
-        );
-
-        product.setQuantityState(
-                dto.quantityState() != null
-                        ? dto.quantityState()
-                        : QuantityState.ENDED
-        );
+        if (product.getProductState() == null) {
+            product.setProductState(ProductState.ACTIVE);
+        }
 
         return mapper.toDto(repository.save(product));
     }
 
     public ProductDto updateProduct(ProductDto dto) {
-
         Product product = repository.findById(dto.productId())
                 .orElseThrow(() ->
                         new ProductNotFoundException(
@@ -74,7 +59,11 @@ public class ShoppingStoreService {
         product.setDescription(dto.description());
         product.setImageSrc(dto.imageSrc());
         product.setQuantityState(dto.quantityState());
-        product.setProductState(dto.productState());
+
+        if (dto.productState() != null) {
+            product.setProductState(dto.productState());
+        }
+
         product.setProductCategory(dto.productCategory());
         product.setPrice(dto.price());
 
@@ -82,7 +71,6 @@ public class ShoppingStoreService {
     }
 
     public boolean removeProductFromStore(UUID productId) {
-
         Product product = repository.findById(productId)
                 .orElseThrow(() ->
                         new ProductNotFoundException(
@@ -96,9 +84,10 @@ public class ShoppingStoreService {
         return true;
     }
 
-    public boolean setProductQuantityState(String rawProductId,
-                                           String rawQuantityState) {
-
+    public boolean setProductQuantityState(
+            String rawProductId,
+            String rawQuantityState
+    ) {
         UUID productId = parseUuid(rawProductId);
 
         QuantityState quantityState =
@@ -118,7 +107,6 @@ public class ShoppingStoreService {
     }
 
     public ProductDto getProduct(UUID productId) {
-
         return mapper.toDto(
                 repository.findById(productId)
                         .orElseThrow(() ->
@@ -129,7 +117,6 @@ public class ShoppingStoreService {
     }
 
     private UUID parseUuid(String raw) {
-
         try {
             return UUID.fromString(raw);
         } catch (Exception e) {
@@ -141,7 +128,6 @@ public class ShoppingStoreService {
     }
 
     private QuantityState parseQuantityState(String raw) {
-
         try {
             return QuantityState.valueOf(
                     raw.trim().toUpperCase()
