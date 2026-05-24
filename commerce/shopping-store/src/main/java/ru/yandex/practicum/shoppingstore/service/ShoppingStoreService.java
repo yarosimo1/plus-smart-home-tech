@@ -20,7 +20,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ShoppingStoreService {
-
     private final ProductRepository repository;
     private final ProductMapper mapper;
 
@@ -45,7 +44,9 @@ public class ShoppingStoreService {
             product.setProductState(ProductState.ACTIVE);
         }
 
-        return mapper.toDto(repository.save(product));
+        Product saved = repository.save(product);
+
+        return mapper.toDto(saved);
     }
 
     public ProductDto updateProduct(ProductDto dto) {
@@ -59,11 +60,7 @@ public class ShoppingStoreService {
         product.setDescription(dto.description());
         product.setImageSrc(dto.imageSrc());
         product.setQuantityState(dto.quantityState());
-
-        if (dto.productState() != null) {
-            product.setProductState(dto.productState());
-        }
-
+        product.setProductState(dto.productState());
         product.setProductCategory(dto.productCategory());
         product.setPrice(dto.price());
 
@@ -84,10 +81,7 @@ public class ShoppingStoreService {
         return true;
     }
 
-    public boolean setProductQuantityState(
-            String rawProductId,
-            String rawQuantityState
-    ) {
+    public boolean setProductQuantityState(String rawProductId, String rawQuantityState) {
         UUID productId = parseUuid(rawProductId);
 
         QuantityState quantityState =
