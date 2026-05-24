@@ -29,6 +29,10 @@ public class ShoppingStoreService {
 
     public ProductDto createProduct(ProductDto dto) {
         Product product = mapper.toEntity(dto);
+        product.setProductId(UUID.randomUUID());
+        if (product.getProductState() == null) {
+            product.setProductState(ProductState.ACTIVE);
+        }
         return mapper.toDto(repository.save(product));
     }
 
