@@ -16,7 +16,6 @@ spring:
         service-id: config-server
       fail-fast: false
 
-
 eureka:
   client:
     serviceUrl:
