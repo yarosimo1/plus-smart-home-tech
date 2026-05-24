@@ -6,7 +6,7 @@ spring:
     password: ${SHOPPING_STORE_DB_PASSWORD:shopping_store}
   jpa:
     hibernate:
-      ddl-auto: always
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
