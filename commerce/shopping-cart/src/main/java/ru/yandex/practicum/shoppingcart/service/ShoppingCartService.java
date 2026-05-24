@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.interactionapi.dto.cart.ChangeProductQuantityRequest;
 import ru.yandex.practicum.interactionapi.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.interactionapi.dto.store.ProductDto;
+import ru.yandex.practicum.interactionapi.dto.warehouse.BookedProductsDto;
 import ru.yandex.practicum.shoppingcart.client.ShoppingStoreClient;
 import ru.yandex.practicum.shoppingcart.client.WarehouseClient;
 import ru.yandex.practicum.shoppingcart.mapper.ShoppingCartMapper;
@@ -29,8 +30,8 @@ public class ShoppingCartService {
         return shoppingStoreClient.getProduct(id);
     }
 
-    public Boolean isAvailable(ShoppingCartDto cart) {
-        return warehouseClient.isAvailable(cart);
+    public BookedProductsDto isAvailable(ShoppingCartDto cart) {
+        return warehouseClient.checkProducts(cart);
     }
 
     @Transactional

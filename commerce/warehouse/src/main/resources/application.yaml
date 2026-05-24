@@ -1,20 +1,18 @@
 spring:
   application:
     name: warehouse
-  config:
-    import: "optional:configserver:"
-    fail-fast: false
-    retry:
-      initial-interval: 2000
-      multiplier: 1.5
-      max-interval: 10000
-      max-attempts: 20
-  cloud:
-    config:
-      discovery:
-        enabled: true
-        service-id: config-server
-      fail-fast: false
+  datasource:
+    url: ${WAREHOUSE_DB_URL:jdbc:postgresql://localhost:5435/warehouse}
+    driver-class-name: org.postgresql.Driver
+    username: ${WAREHOUSE_DB_USERNAME:warehouse}
+    password: ${WAREHOUSE_DB_PASSWORD:warehouse}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 
 eureka:

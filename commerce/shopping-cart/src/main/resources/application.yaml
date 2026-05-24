@@ -11,6 +11,9 @@ spring:
       max-attempts: 20
   cloud:
     config:
+      openfeign:
+        circuitbreaker:
+          enabled: true
       discovery:
         enabled: true
         service-id: config-server
