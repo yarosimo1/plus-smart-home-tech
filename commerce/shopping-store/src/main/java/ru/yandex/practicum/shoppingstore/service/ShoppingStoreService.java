@@ -20,25 +20,56 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ShoppingStoreService {
+
     private final ProductRepository repository;
     private final ProductMapper mapper;
 
-    public Page<ProductDto> getProducts(ProductCategory category, Pageable pageable) {
-        return repository.findAllByProductCategoryAndProductState(category, ProductState.ACTIVE, pageable).map(mapper::toDto);
+    public Page<ProductDto> getProducts(ProductCategory category,
+                                        Pageable pageable) {
+
+        return repository
+                .findAllByProductCategoryAndProductState(
+                        category,
+                        ProductState.ACTIVE,
+                        pageable
+                )
+                .map(mapper::toDto);
     }
 
     public ProductDto createProduct(ProductDto dto) {
-        Product product = mapper.toEntity(dto);
+
+        Product product = new Product();
+
         product.setProductId(UUID.randomUUID());
-        if (product.getProductState() == null) {
-            product.setProductState(ProductState.ACTIVE);
-        }
+        product.setProductName(dto.productName());
+        product.setDescription(dto.description());
+        product.setImageSrc(dto.imageSrc());
+        product.setPrice(dto.price());
+        product.setProductCategory(dto.productCategory());
+
+        product.setProductState(
+                dto.productState() != null
+                        ? dto.productState()
+                        : ProductState.ACTIVE
+        );
+
+        product.setQuantityState(
+                dto.quantityState() != null
+                        ? dto.quantityState()
+                        : QuantityState.ENDED
+        );
+
         return mapper.toDto(repository.save(product));
     }
 
     public ProductDto updateProduct(ProductDto dto) {
+
         Product product = repository.findById(dto.productId())
-                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + dto.productId()));
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found: " + dto.productId()
+                        ));
+
         product.setProductName(dto.productName());
         product.setDescription(dto.description());
         product.setImageSrc(dto.imageSrc());
@@ -46,45 +77,80 @@ public class ShoppingStoreService {
         product.setProductState(dto.productState());
         product.setProductCategory(dto.productCategory());
         product.setPrice(dto.price());
+
         return mapper.toDto(repository.save(product));
     }
 
     public boolean removeProductFromStore(UUID productId) {
+
         Product product = repository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productId));
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found: " + productId
+                        ));
+
         product.setProductState(ProductState.DEACTIVATE);
+
         repository.save(product);
+
         return true;
     }
 
-    public boolean setProductQuantityState(String rawProductId, String rawQuantityState) {
+    public boolean setProductQuantityState(String rawProductId,
+                                           String rawQuantityState) {
+
         UUID productId = parseUuid(rawProductId);
-        QuantityState quantityState = parseQuantityState(rawQuantityState);
+
+        QuantityState quantityState =
+                parseQuantityState(rawQuantityState);
+
         Product product = repository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productId));
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found: " + productId
+                        ));
+
         product.setQuantityState(quantityState);
+
         repository.save(product);
+
         return true;
     }
 
     public ProductDto getProduct(UUID productId) {
-        return mapper.toDto(repository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productId)));
+
+        return mapper.toDto(
+                repository.findById(productId)
+                        .orElseThrow(() ->
+                                new ProductNotFoundException(
+                                        "Product not found: " + productId
+                                ))
+        );
     }
 
     private UUID parseUuid(String raw) {
+
         try {
             return UUID.fromString(raw);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid productId");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid productId"
+            );
         }
     }
 
     private QuantityState parseQuantityState(String raw) {
+
         try {
-            return QuantityState.valueOf(raw.trim().toUpperCase());
+            return QuantityState.valueOf(
+                    raw.trim().toUpperCase()
+            );
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid quantityState");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid quantityState"
+            );
         }
     }
 }

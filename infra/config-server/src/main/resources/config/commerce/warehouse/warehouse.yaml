@@ -6,7 +6,7 @@ spring:
     password: ${WAREHOUSE_DB_PASSWORD:warehouse}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: always
     show-sql: false
     properties:
       hibernate:
