@@ -1,4 +1,4 @@
-package ru.yandex.practicum.warehouse.exception;
+package ru.yandex.practicum.interactionapi.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.interactionapi.exception.ApiException;
 
 import java.util.stream.Collectors;
 

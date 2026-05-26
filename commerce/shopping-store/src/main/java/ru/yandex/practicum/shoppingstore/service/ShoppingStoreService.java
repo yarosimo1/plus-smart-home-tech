@@ -81,17 +81,13 @@ public class ShoppingStoreService {
         return true;
     }
 
-    public boolean setProductQuantityState(String rawProductId, String rawQuantityState) {
-        UUID productId = parseUuid(rawProductId);
-
-        QuantityState quantityState =
-                parseQuantityState(rawQuantityState);
-
+    public boolean setProductQuantityState(UUID productId, QuantityState quantityState) {
         Product product = repository.findById(productId)
                 .orElseThrow(() ->
                         new ProductNotFoundException(
                                 "Product not found: " + productId
-                        ));
+                        )
+                );
 
         product.setQuantityState(quantityState);
 

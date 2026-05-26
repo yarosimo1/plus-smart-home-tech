@@ -1,4 +1,4 @@
-package ru.yandex.practicum.warehouse.exception;
+package ru.yandex.practicum.interactionapi.exception;
 
 import org.springframework.http.HttpStatus;
 

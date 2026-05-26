@@ -14,15 +14,21 @@ import ru.yandex.practicum.interactionapi.exception.SpecifiedProductAlreadyInWar
 import ru.yandex.practicum.warehouse.model.WarehouseProduct;
 import ru.yandex.practicum.warehouse.repository.WarehouseRepository;
 
+import java.security.SecureRandom;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class WarehouseServiceImpl implements WarehouseService {
+    private static final String[] ADDRESSES = {
+            "ADDRESS_1",
+            "ADDRESS_2"
+    };
+    private static final Random RANDOM = Random.from(new SecureRandom());
     private final WarehouseRepository repository;
-    private final String currentWarehouseAddress;
 
     @Override
     @Transactional
@@ -113,12 +119,16 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public AddressDto getAddress() {
+
+        String currentAddress =
+                ADDRESSES[RANDOM.nextInt(ADDRESSES.length)];
+
         return AddressDto.builder()
-                .country(currentWarehouseAddress)
-                .city(currentWarehouseAddress)
-                .street(currentWarehouseAddress)
-                .house(currentWarehouseAddress)
-                .flat(currentWarehouseAddress)
+                .country("Россия")
+                .city("Москва")
+                .street(currentAddress)
+                .house("10")
+                .flat("5")
                 .build();
     }
 }

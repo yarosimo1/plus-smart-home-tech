@@ -7,9 +7,13 @@ import ru.yandex.practicum.interactionapi.dto.store.ProductDto;
 
 import java.util.UUID;
 
-@FeignClient(name = "shopping-store")
+@FeignClient(
+        name = "shopping-store",
+        path = "/api/v1/shopping-store",
+        fallback = ShoppingStoreClientFallback.class
+)
 public interface ShoppingStoreClient {
 
-    @GetMapping("/api/v1/shopping-store/{productId}")
+    @GetMapping("/{productId}")
     ProductDto getProduct(@PathVariable UUID productId);
 }

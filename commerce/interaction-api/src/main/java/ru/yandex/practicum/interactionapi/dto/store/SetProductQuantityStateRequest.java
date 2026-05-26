@@ -1,7 +1,9 @@
 package ru.yandex.practicum.interactionapi.dto.store;
 
+import jakarta.validation.constraints.NotNull;
+
 public record SetProductQuantityStateRequest(
-        String productId,
-        QuantityState quantityState
+        @NotNull String productId,
+        @NotNull QuantityState quantityState
 ) {
 }
