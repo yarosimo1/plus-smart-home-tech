@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: ${SHOPPING_STORE_DB_URL:jdbc:postgresql://localhost:5433/shopping_store}
+    driver-class-name: org.postgresql.Driver
+    username: ${SHOPPING_STORE_DB_USERNAME:shopping_store}
+    password: ${SHOPPING_STORE_DB_PASSWORD:shopping_store}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

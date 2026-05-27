@@ -30,7 +30,7 @@
     </properties>
 
     <build>
-        <finalName>config-server</finalName>
+        <finalName>config-server-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
