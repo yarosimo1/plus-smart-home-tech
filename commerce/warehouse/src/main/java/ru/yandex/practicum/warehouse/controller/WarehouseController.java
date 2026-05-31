@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.interactionapi.dto.cart.ShoppingCartDto;
-import ru.yandex.practicum.interactionapi.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.interactionapi.dto.warehouse.AddressDto;
-import ru.yandex.practicum.interactionapi.dto.warehouse.BookedProductsDto;
-import ru.yandex.practicum.interactionapi.dto.warehouse.NewProductInWarehouseRequest;
+import ru.yandex.practicum.interactionapi.dto.warehouse.*;
 import ru.yandex.practicum.warehouse.service.WarehouseService;
 
 @RestController
@@ -35,5 +32,20 @@ public class WarehouseController {
     @GetMapping("/address")
     public AddressDto getWarehouseAddress() {
         return warehouseService.getAddress();
+    }
+
+    @PostMapping("/assembly")
+    public BookedProductsDto assemblyProductForOrderFromShoppingCart(@RequestBody @Valid AssemblyProductsForOrderRequest request) {
+        return warehouseService.assemblyProductForOrderFromShoppingCart(request);
+    }
+
+    @PostMapping("/shipped")
+    public void shippedToDelivery(@RequestBody @Valid ShippedToDeliveryRequest request) {
+        warehouseService.shippedToDelivery(request);
+    }
+
+    @PostMapping("/return")
+    public void returnProducts(@RequestBody @Valid AssemblyProductsForOrderRequest request) {
+        warehouseService.returnProducts(request);
     }
 }

@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: ${DELIVERY_DB_URL:jdbc:postgresql://localhost:5438/delivery}
+    driver-class-name: org.postgresql.Driver
+    username: ${DELIVERY_DB_USERNAME:delivery}
+    password: ${DELIVERY_DB_PASSWORD:delivery}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+delivery:
+  base-cost: ${DELIVERY_BASE_COST:5.0}
+  address-1-factor: ${DELIVERY_ADDRESS_1_FACTOR:1.0}
+  address-2-factor: ${DELIVERY_ADDRESS_2_FACTOR:2.0}
+  fragile-rate: ${DELIVERY_FRAGILE_RATE:0.2}
+  weight-rate: ${DELIVERY_WEIGHT_RATE:0.3}
+  volume-rate: ${DELIVERY_VOLUME_RATE:0.2}
+  different-street-rate: ${DELIVERY_DIFFERENT_STREET_RATE:0.2}
