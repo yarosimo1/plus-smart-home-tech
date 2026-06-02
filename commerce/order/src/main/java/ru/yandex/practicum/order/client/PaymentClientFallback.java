@@ -15,23 +15,20 @@ public class PaymentClientFallback implements PaymentClient {
 
     @Override
     public BigDecimal productCost(OrderDto orderDto) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
     @Override
     public BigDecimal getTotalCost(OrderDto orderDto) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
     @Override
     public PaymentDto payment(OrderDto orderDto) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
-    private void throwUnavailable() {
+    private <T> T throwUnavailable() {
         log.error("{} service unavailable", SERVICE_NAME);
         throw new RemoteServiceUnavailableException(SERVICE_NAME);
     }

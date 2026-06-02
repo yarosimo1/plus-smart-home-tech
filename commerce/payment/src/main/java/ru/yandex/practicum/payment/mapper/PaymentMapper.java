@@ -9,6 +9,7 @@ public class PaymentMapper {
     public PaymentDto toDto(Payment payment) {
         return PaymentDto.builder()
                 .paymentId(payment.getPaymentId())
+                .state(payment.getState())
                 .totalPayment(payment.getTotalPayment())
                 .deliveryTotal(payment.getDeliveryTotal())
                 .feeTotal(payment.getFeeTotal())

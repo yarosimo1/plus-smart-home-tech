@@ -12,14 +12,12 @@ public class WarehouseClientFallback implements WarehouseClient {
 
     @Override
     public BookedProductsDto assemblyProductForOrderFromShoppingCart(AssemblyProductsForOrderRequest request) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
     @Override
     public AddressDto getWarehouseAddress() {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
     @Override
@@ -27,7 +25,7 @@ public class WarehouseClientFallback implements WarehouseClient {
         throwUnavailable();
     }
 
-    private void throwUnavailable() {
+    private <T> T throwUnavailable() {
         log.error("{} service unavailable", SERVICE_NAME);
         throw new RemoteServiceUnavailableException(SERVICE_NAME);
     }

@@ -27,7 +27,7 @@ public class PaymentController {
     }
 
     @PostMapping("/refund")
-    public void paymentSuccess(@RequestBody UUID paymentId) {
+    public void refund(@RequestBody UUID paymentId) {
         paymentService.refund(paymentId);
     }
 

@@ -8,6 +8,7 @@ import ru.yandex.practicum.interactionapi.dto.order.OrderDto;
 import ru.yandex.practicum.interactionapi.dto.payment.PaymentState;
 import ru.yandex.practicum.interactionapi.dto.payment.PaymentDto;
 import ru.yandex.practicum.interactionapi.exception.NoOrderFoundException;
+import ru.yandex.practicum.interactionapi.exception.NoPaymentFoundException;
 import ru.yandex.practicum.interactionapi.exception.NotEnoughInfoInOrderToCalculateException;
 import ru.yandex.practicum.payment.client.OrderClient;
 import ru.yandex.practicum.payment.client.ShoppingStoreClient;
@@ -35,7 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentDto payment(OrderDto order) {
         validateOrder(order);
-        BigDecimal productTotal = productCost(order);
+        BigDecimal productTotal = order.getProductPrice() != null ? order.getProductPrice() : productCost(order);
         BigDecimal deliveryTotal = require(order.getDeliveryPrice(), "deliveryPrice is required");
         BigDecimal feeTotal = productTotal.multiply(vatRate);
         Payment payment = Payment.builder()
@@ -60,7 +61,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public void refund(UUID paymentId) {
         Payment payment = getPayment(paymentId);
-        payment.setState(PaymentState.SUCCESS);
+        payment.setState(PaymentState.REFUNDED);
         orderClient.paymentSuccess(payment.getOrderId());
     }
 
@@ -84,7 +85,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private Payment getPayment(UUID paymentId) {
-        return paymentRepository.findById(paymentId).orElseThrow(() -> new NoOrderFoundException(paymentId));
+        return paymentRepository.findById(paymentId).orElseThrow(() -> new NoPaymentFoundException(paymentId));
     }
 
     private void validateOrder(OrderDto order) {

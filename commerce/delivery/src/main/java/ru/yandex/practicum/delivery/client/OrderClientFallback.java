@@ -14,23 +14,20 @@ public class OrderClientFallback implements OrderClient {
 
     @Override
     public OrderDto delivery(UUID orderId) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
     @Override
     public OrderDto deliveryFailed(UUID orderId) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
     @Override
     public OrderDto assembly(UUID orderId) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
-    private void throwUnavailable() {
+    private <T> T throwUnavailable() {
         log.error("{} service unavailable", SERVICE_NAME);
         throw new RemoteServiceUnavailableException(SERVICE_NAME);
     }

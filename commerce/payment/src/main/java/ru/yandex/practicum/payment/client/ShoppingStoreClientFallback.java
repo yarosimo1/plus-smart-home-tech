@@ -14,6 +14,10 @@ public class ShoppingStoreClientFallback implements ShoppingStoreClient {
 
     @Override
     public ProductDto getProduct(UUID productId) {
+        return throwUnavailable();
+    }
+
+    private <T> T throwUnavailable() {
         log.error("{} service unavailable", SERVICE_NAME);
         throw new RemoteServiceUnavailableException(SERVICE_NAME);
     }

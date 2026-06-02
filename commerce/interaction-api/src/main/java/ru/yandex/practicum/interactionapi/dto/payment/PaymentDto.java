@@ -12,6 +12,7 @@ import java.util.UUID;
 @Builder
 public class PaymentDto {
     private UUID paymentId;
+    private PaymentState state;
     private BigDecimal totalPayment;
     private BigDecimal deliveryTotal;
     private BigDecimal feeTotal;

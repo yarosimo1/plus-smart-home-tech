@@ -14,17 +14,15 @@ public class OrderClientFallback implements OrderClient {
 
     @Override
     public OrderDto paymentSuccess(UUID orderId) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
     @Override
     public OrderDto paymentFailed(UUID orderId) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
-    private void throwUnavailable() {
+    private <T> T throwUnavailable() {
         log.error("{} service unavailable", SERVICE_NAME);
         throw new RemoteServiceUnavailableException(SERVICE_NAME);
     }

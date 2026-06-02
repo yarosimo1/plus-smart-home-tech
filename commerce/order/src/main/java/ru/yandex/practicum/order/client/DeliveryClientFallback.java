@@ -15,17 +15,15 @@ public class DeliveryClientFallback implements DeliveryClient {
 
     @Override
     public DeliveryDto planDelivery(DeliveryDto deliveryDto) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
     @Override
     public BigDecimal deliveryCost(OrderDto orderDto) {
-        throwUnavailable();
-        return null;
+        return throwUnavailable();
     }
 
-    private void throwUnavailable() {
+    private <T> T throwUnavailable() {
         log.error("{} service unavailable", SERVICE_NAME);
         throw new RemoteServiceUnavailableException(SERVICE_NAME);
     }
