@@ -100,7 +100,65 @@ services:
     volumes:
       - shopping-store-db-data:/var/lib/postgresql/data
 
+  order-db:
+    image: postgres:16-alpine
+    container_name: order-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: order
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U order -d order_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+
+  payment-db:
+    image: postgres:16-alpine
+    container_name: payment-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: payment
+      POSTGRES_USER: payment
+      POSTGRES_PASSWORD: payment
+    ports:
+      - "5437:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U payment -d payment" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+
+  delivery-db:
+    image: postgres:16-alpine
+    container_name: delivery-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: delivery
+      POSTGRES_USER: delivery
+      POSTGRES_PASSWORD: delivery
+    ports:
+      - "5438:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U delivery -d delivery" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - delivery-db-data:/var/lib/postgresql/data
+
+
 volumes:
   shopping-store-db-data:
   shopping-cart-db-data:
   warehouse-db-data:
+  order-db-data:
+  payment-db-data:
+  delivery-db-data:
