@@ -1,116 +1,339 @@
 # Plus Smart Home Tech
 
-Микросервисный проект для «умного дома» и e-commerce-сценариев: сбор телеметрии устройств, обработка сценариев, каталог товаров, корзина, склад, оформление заказа, оплата и доставка.
+Многомодульное приложение, объединяющее обработку телеметрии умного дома и e-commerce сценарии.
 
-## Структура проекта
+Проект демонстрирует использование **Kafka, event-driven architecture, Avro, Protobuf, gRPC и Spring Cloud** в распределённой системе.
 
-- `telemetry/` — сервисы телеметрии умного дома:
-    - `collector` — принимает события датчиков и хабов, публикует их в Kafka;
-    - `aggregator` — агрегирует события датчиков в снапшоты;
-    - `analyzer` — анализирует снапшоты и события хабов, запускает сценарии;
-    - `serialization` — Avro/Protobuf-схемы, сериализаторы и десериализаторы.
-- `commerce/` — сервисы интернет-магазина:
-    - `shopping-store` — каталог товаров;
-    - `shopping-cart` — корзина покупателя;
-    - `warehouse` — склад, бронирование и отгрузка товаров;
-    - `order` — оформление и жизненный цикл заказа;
-    - `payment` — расчёт стоимости и платежи;
-    - `delivery` — планирование и расчёт доставки;
-    - `interaction-api` — общие DTO и исключения для commerce-сервисов.
-- `infra/` — инфраструктурные сервисы Spring Cloud:
-    - `config-server` — централизованная конфигурация сервисов;
-    - `discovery-server` — Eureka service discovery;
-    - `gateway-server` — API Gateway.
-- `hub-router/` — вспомогательные скрипты для запуска проверок telemetry-сценариев.
-- `compose.yaml` — Kafka и PostgreSQL-базы для локального запуска.
+**Status:** Completed
 
-## Требования
+---
 
-- Java 21
-- Maven 3.9+
-- Docker и Docker Compose
+## Tech Stack
 
-## Локальный запуск
+### Backend
 
-1. Соберите проект:
+![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.2-brightgreen?logo=springboot)
+![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2023.0.3-brightgreen?logo=spring)
 
-   ```bash
-   mvn clean package
-   ```
+* Spring Boot
+* Spring Cloud
+* Spring Data JPA
+* Spring Web
+* Spring Cloud Gateway
+* Eureka
+* Config Server
 
-2. Запустите инфраструктурные зависимости:
+### Messaging & Serialization
 
-   ```bash
-   docker compose up -d
-   ```
+![Kafka](https://img.shields.io/badge/Apache%20Kafka-black?logo=apachekafka)
+![Avro](https://img.shields.io/badge/Apache%20Avro-red)
+![gRPC](https://img.shields.io/badge/gRPC-4285F4?logo=grpc)
 
-   Compose поднимает Kafka и PostgreSQL-базы для commerce-сервисов. Порты по умолчанию:
+* Apache Kafka
+* Kafka Clients
+* Avro
+* Protocol Buffers
+* gRPC
 
-   | Сервис | Порт |
-      | --- | --- |
-   | Kafka | `9092` |
-   | shopping-store-db | `5433` |
-   | shopping-cart-db | `5434` |
-   | warehouse-db | `5435` |
-   | order-db | `5436` |
-   | payment-db | `5437` |
-   | delivery-db | `5438` |
+### Data & Infrastructure
 
-3. Запустите инфраструктурные Spring Cloud сервисы:
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue?logo=postgresql)
+![Docker](https://img.shields.io/badge/Docker-blue?logo=docker)
+![Maven](https://img.shields.io/badge/Maven-C71A36?logo=apachemaven)
 
-   ```bash
-   mvn -pl infra/config-server spring-boot:run
-   mvn -pl infra/discovery-server spring-boot:run
-   mvn -pl infra/gateway-server spring-boot:run
-   ```
+* PostgreSQL
+* Hibernate / JPA
+* Docker
+* Docker Compose
+* Maven
+* Springdoc OpenAPI
 
-4. Запустите нужные прикладные сервисы, например commerce-сервисы:
+---
 
-   ```bash
-   mvn -pl commerce/shopping-store spring-boot:run
-   mvn -pl commerce/shopping-cart spring-boot:run
-   mvn -pl commerce/warehouse spring-boot:run
-   mvn -pl commerce/order spring-boot:run
-   mvn -pl commerce/payment spring-boot:run
-   mvn -pl commerce/delivery spring-boot:run
-   ```
+## About the Project
 
-5. Для telemetry-сервисов запустите необходимые модули:
+Проект состоит из двух основных функциональных областей:
 
-   ```bash
-   mvn -pl telemetry/collector spring-boot:run
-   mvn -pl telemetry/aggregator spring-boot:run
-   mvn -pl telemetry/analyzer spring-boot:run
-   ```
-
-## Конфигурация
-
-Основные настройки сервисов лежат в `infra/config-server/src/main/resources/config`. Для локального запуска значения по умолчанию уже указывают на сервисы из `compose.yaml`. При необходимости их можно переопределить переменными окружения, например:
-
-- `SHOPPING_STORE_DB_URL`, `SHOPPING_STORE_DB_USERNAME`, `SHOPPING_STORE_DB_PASSWORD`
-- `WAREHOUSE_DB_URL`, `WAREHOUSE_DB_USERNAME`, `WAREHOUSE_DB_PASSWORD`
-- `ORDER_DB_URL`, `PAYMENT_DB_URL`, `DELIVERY_DB_URL`
-- `DELIVERY_BASE_COST`, `DELIVERY_WEIGHT_RATE`, `DELIVERY_VOLUME_RATE`
-- `PAYMENT_VAT_RATE`
-
-## Проверки
-
-Запуск всех тестов:
-
-```bash
-mvn test
+```text
+┌─────────────────────────────────────┐
+│         Plus Smart Home Tech        │
+├─────────────────┬───────────────────┤
+│ Smart Home      │ E-commerce        │
+│ Telemetry       │                   │
+└─────────────────┴───────────────────┘
 ```
 
-Скрипты для проверок hub-router находятся в `hub-router/run-tests.sh` и `hub-router/run-tests.bat`.
+Первая часть отвечает за обработку событий от устройств умного дома.
 
-## Остановка локального окружения
+Вторая часть моделирует e-commerce систему с отдельными сервисами для магазина, корзины, склада, заказов, оплаты и доставки.
 
-```bash
-docker compose down
+Такое разделение позволяет продемонстрировать несколько подходов к взаимодействию сервисов в одном многомодульном проекте.
+
+---
+
+# Smart Home Telemetry
+
+## Architecture
+
+Основной поток обработки телеметрии построен вокруг Kafka.
+
+```text
+Sensors / Hubs
+      │
+      ▼
+┌──────────────┐
+│   Collector  │
+└──────┬───────┘
+       │
+       │ Kafka
+       ▼
+┌──────────────┐
+│    Kafka     │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│  Aggregator  │
+└──────┬───────┘
+       │
+       │ Snapshots
+       ▼
+┌──────────────┐
+│   Analyzer   │
+└──────┬───────┘
+       │
+       │ gRPC
+       ▼
+┌──────────────┐
+│  Hub Router  │
+└──────────────┘
 ```
 
-Чтобы удалить данные локальных PostgreSQL-баз:
+---
+
+## Collector
+
+Получает события от датчиков и хабов и публикует их в Kafka.
+
+Основные Kafka topics:
+
+```text
+telemetry.sensors.v1
+telemetry.hubs.v1
+```
+
+---
+
+## Aggregator
+
+Обрабатывает события датчиков и формирует агрегированные snapshots.
+
+Результат публикуется в:
+
+```text
+telemetry.snapshots.v1
+```
+
+---
+
+## Analyzer
+
+Анализирует snapshots и события хабов.
+
+На основе полученных данных сервис выполняет сценарии автоматизации умного дома.
+
+Для взаимодействия с Hub Router используется **gRPC**.
+
+---
+
+## Serialization
+
+Отдельный модуль отвечает за схемы и сериализацию сообщений.
+
+Используются:
+
+* Apache Avro;
+* Protocol Buffers;
+* Kafka serialization/deserialization.
+
+Это позволяет отделить формат сообщений от бизнес-логики сервисов.
+
+---
+
+# E-commerce
+
+Вторая часть проекта представляет набор взаимодействующих сервисов.
+
+```text
+                 ┌──────────────┐
+                 │   Gateway    │
+                 └──────┬───────┘
+                        │
+        ┌───────────────┼────────────────┐
+        │               │                │
+        ▼               ▼                ▼
+   Shopping Store   Shopping Cart    Warehouse
+        │               │                │
+        └───────────────┼────────────────┘
+                        │
+                        ▼
+                      Order
+                        │
+              ┌─────────┴─────────┐
+              ▼                   ▼
+           Payment             Delivery
+```
+
+### Services
+
+* `shopping-store` — работа с товарами;
+* `shopping-cart` — корзина пользователя;
+* `warehouse` — складские операции;
+* `order` — работа с заказами;
+* `payment` — обработка оплаты;
+* `delivery` — доставка;
+* `interaction-api` — контракты взаимодействия между сервисами.
+
+---
+
+# Infrastructure
+
+Проект использует Spring Cloud инфраструктуру:
+
+```text
+┌──────────────────┐
+│   API Gateway    │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Eureka Discovery │
+└──────────────────┘
+
+┌──────────────────┐
+│  Config Server   │
+└──────────────────┘
+```
+
+Используются:
+
+* Spring Cloud Gateway;
+* Eureka Discovery Server;
+* Spring Cloud Config Server.
+
+---
+
+# Project Structure
+
+```text
+plus-smart-home-tech/
+│
+├── telemetry/
+│   ├── collector/
+│   ├── aggregator/
+│   ├── analyzer/
+│   └── serialization/
+│
+├── commerce/
+│   ├── shopping-store/
+│   ├── shopping-cart/
+│   ├── warehouse/
+│   ├── order/
+│   ├── payment/
+│   ├── delivery/
+│   └── interaction-api/
+│
+├── infra/
+│   ├── config-server/
+│   ├── discovery-server/
+│   └── gateway-server/
+│
+├── hub-router/
+│
+├── compose.yaml
+└── pom.xml
+```
+
+---
+
+# Key Technical Decisions
+
+### Event-Driven Architecture
+
+Обмен событиями между компонентами telemetry реализован через Kafka.
+
+```text
+Producer → Kafka → Consumer
+```
+
+Это позволяет отделить producer и consumer и использовать асинхронное взаимодействие.
+
+### Schema-Based Serialization
+
+Для сообщений используются Avro и Protobuf.
+
+Схемы позволяют явно определить структуру передаваемых данных.
+
+### gRPC
+
+gRPC используется для взаимодействия Analyzer с Hub Router.
+
+```text
+Analyzer
+   │
+   │ gRPC
+   ▼
+Hub Router
+```
+
+### Microservices
+
+E-commerce часть разделена на сервисы по отдельным бизнес-областям.
+
+### Database per Service
+
+Для e-commerce сервисов используются отдельные PostgreSQL базы данных.
+
+---
+
+# Running the Project
+
+Для запуска инфраструктуры используется Docker Compose.
+
+Основные компоненты:
+
+```text
+Kafka
+PostgreSQL
+Spring Cloud services
+Application services
+```
+
+Запуск:
 
 ```bash
-docker compose down -v
+docker compose up
 ```
+
+---
+
+# What This Project Demonstrates
+
+* event-driven architecture;
+* Apache Kafka;
+* producer / consumer interaction;
+* Avro;
+* Protocol Buffers;
+* gRPC;
+* Spring Boot;
+* Spring Cloud;
+* Eureka;
+* Config Server;
+* API Gateway;
+* микросервисную декомпозицию;
+* PostgreSQL;
+* JPA / Hibernate;
+* Docker Compose;
+* Maven;
+* работу с несколькими независимыми бизнес-доменами.
